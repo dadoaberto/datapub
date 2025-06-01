@@ -121,8 +121,7 @@ class Downloader:
             "status": "sucesso",
         }
 
-        metadata_filename = f"metadata_{date_str}.json"
-        metadata_path = self.metadata_dir / metadata_filename
+        metadata_path = self.metadata_dir / f"metadata_{date_str}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
 
         with open(metadata_path, "w", encoding="utf-8") as f:
             json.dump(metadata, f, ensure_ascii=False, indent=2)

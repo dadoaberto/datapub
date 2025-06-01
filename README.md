@@ -1,5 +1,16 @@
 # 📂 **DataPub – Sistema de Análise de Documentos Públicos**
 
+🚀 Vamos juntos fazer esse projeto acontecer! 💡
+
+Para que possamos avançar de verdade, precisamos de uma grande força-tarefa — e isso só será possível com a ajuda de vocês! 💪💙
+
+Ainda temos muita coisa para desenvolver até que esse sonho se torne 100% realidade. Por isso, definimos uma meta inicial de R$600 em doações mensais 🙏. Com esse apoio, poderemos investir mais tempo, dedicação e mão de obra para tirar tudo do papel! 🛠️✨
+
+Se você acredita na ideia e quer fazer parte disso, considere nos apoiar:
+
+<iframe src="https://github.com/sponsors/a21ns1g4ts/card" title="Sponsor a21ns1g4ts" height="225" width="600" style="border: 0;"></iframe>
+❤️ Toda ajuda faz a diferença. Obrigado por caminhar com a gente! 🙌
+
 ## 📌 Visão Geral
 
 **DataPub** é uma plataforma para **coleta, processamento, estruturação e análise de documentos públicos brasileiros**, incluindo **Diários Oficiais, contratos, portarias, atos administrativos e demais publicações governamentais**.
@@ -111,3 +122,11 @@ Este projeto é de código aberto sob a [MIT License](LICENSE).
 ---
 
 Se desejar, posso gerar a versão Markdown pronta para colar no GitHub, incluindo badges, links e escopo modularizado. Deseja isso?
+
+
+## Apoie
+
+Para que a gente consiga avançar com o projeto é necessário uma grande força tarefa e isso será possivel apenas com a ajuda de vocÊs
+Precisamos desenvolver bastante coisa até esse projeto se tornar 100% realidade e estamos com uma meta inicial de 600 reias de doações mensais para que possamos investir força e mão de obra para tornar isso possivel.
+
+<iframe src="https://github.com/sponsors/a21ns1g4ts/card" title="Sponsor a21ns1g4ts" height="225" width="600" style="border: 0;"></iframe>
