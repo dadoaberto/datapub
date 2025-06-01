@@ -62,6 +62,11 @@ def run_downloader(orgao, args):
         params["start_date"] = parse_date(args.start) if args.start else date(2025, 5, 26)
         params["end_date"] = parse_date(args.end) if args.end else date.today()
         print(f"🚀 Iniciando download ALE-CE de {params['start_date']} a {params['end_date']}")
+        
+    elif orgao == "al_ac":
+        params["start_date"] = parse_date(args.start) if args.start else date(2015, 1, 1)
+        params["end_date"] = parse_date(args.end) if args.end else date.today()
+        print(f"🚀 Iniciando download ALE-AC de {params['start_date']} a {params['end_date']}")
     
     # Executa o download
     downloader.download(**params)
@@ -71,12 +76,12 @@ def main():
     subparsers = parser.add_subparsers(dest="orgao", required=True, help="Órgão alvo")
     
     # Configuração para AL-GO
-    parser_algo = subparsers.add_parser("al_go", help="Diários de Alagoas")
+    parser_algo = subparsers.add_parser("al_go", help="Diários Assembléia Legislativa do Goias")
     parser_algo.add_argument("--start", help="Data inicial (YYYY-MM-DD)")
     parser_algo.add_argument("--end", help="Data final (YYYY-MM-DD)")
     
     # Configuração para AL-MS
-    parser_alms = subparsers.add_parser("al_ms", help="Diários do Mato Grosso do Sul")
+    parser_alms = subparsers.add_parser("al_ms", help="Assembléia Legislativa do Mato Grosso do Sul")
     parser_alms.add_argument("--start", help="Número inicial")
     parser_alms.add_argument("--end", help="Número final")
     
@@ -89,6 +94,11 @@ def main():
     parser_alece = subparsers.add_parser("al_ce", help="Diários Assembléia Legislativa do Ceará")
     parser_alece.add_argument("--start", help="Data inicial (YYYY-MM-DD)")
     parser_alece.add_argument("--end", help="Data final (YYYY-MM-DD)")
+
+    # Configuração para AL-AC
+    parser_aleac = subparsers.add_parser("al_ac", help="Diários Assembléia Legislativa do Acre")
+    parser_aleac.add_argument("--start", help="Data inicial (YYYY-MM-DD)")
+    parser_aleac.add_argument("--end", help="Data final (YYYY-MM-DD)")
     
     args = parser.parse_args()
     
