@@ -3,7 +3,7 @@ __pycache__/
 **/__pycache__/
 *.py[cod]
 *.pyo
-data/*
+data/raw/
 
 # Distribution / packaging
 build/
