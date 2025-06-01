@@ -1,0 +1,14 @@
+fastapi
+uvicorn
+python-multipart
+spacy
+transformers
+torch
+psycopg2-binary
+pgvector
+pypdf2
+pdfminer.six
+elasticsearch
+streamlit
+requests
+python-dotenv

@@ -1,0 +1,10 @@
+python -m venv venv
+source venv/bin/activate
+
+
+python -m venv venv
+source venv/bin/activate
+pip install selenium webdriver-manager
+pip install hcaptcha-solver
+pip install pyperclip
+pip install pyautogui
