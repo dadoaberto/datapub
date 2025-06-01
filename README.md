@@ -82,6 +82,7 @@ Nosso objetivo é **tornar mais acessíveis e analisáveis informações que est
 | Assembleia Legislativa do Estado de Goiás (AL-GO) | [Link](https://transparencia.al.go.leg.br/gestao-parlamentar/diario) | ✅ Implementado |
 | Assembleia Legislativa do Estado de Mato Grosso do Sul (AL-MS) | [Link](https://diariooficial.al.ms.gov.br/) | ✅ Implementado |
 | Assembléia Legislativa do Estado do Pará (AL-PA) | [Link](https://www.alepa.pa.gov.br/Comunicacao/Diarios/) | ✅ Implementado |
+| Assembléia Legislativa do Estado do Ceará (AL-CE) | [Link](https://doalece.al.ce.gov.br/publico/ultimas-edicoes/) | ✅ Implementado |
 
 *(Lista completa de fontes disponível no arquivo [sources.csv](data/sources.csv))*
 ---

@@ -57,6 +57,11 @@ def run_downloader(orgao, args):
         params["start_date"] = parse_date(args.start) if args.start else date(2007, 1, 1)
         params["end_date"] = parse_date(args.end) if args.end else date.today()
         print(f"🚀 Iniciando download ALE-PA de {params['start_date']} a {params['end_date']}")
+
+    elif orgao == "al_ce":
+        params["start_date"] = parse_date(args.start) if args.start else date(2025, 5, 26)
+        params["end_date"] = parse_date(args.end) if args.end else date.today()
+        print(f"🚀 Iniciando download ALE-CE de {params['start_date']} a {params['end_date']}")
     
     # Executa o download
     downloader.download(**params)
@@ -79,6 +84,11 @@ def main():
     parser_alepa = subparsers.add_parser("al_pa", help="Diários Assembléia Legislativa do Pará")
     parser_alepa.add_argument("--start", help="Data inicial (YYYY-MM-DD)")
     parser_alepa.add_argument("--end", help="Data final (YYYY-MM-DD)")
+
+    # Configuração para AL-CE
+    parser_alece = subparsers.add_parser("al_ce", help="Diários Assembléia Legislativa do Ceará")
+    parser_alece.add_argument("--start", help="Data inicial (YYYY-MM-DD)")
+    parser_alece.add_argument("--end", help="Data final (YYYY-MM-DD)")
     
     args = parser.parse_args()
     
