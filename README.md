@@ -53,7 +53,6 @@ Nosso objetivo é **tornar mais acessíveis e analisáveis informações que est
 ```
 
 ---
-# 📂 **DataPub – Sistema de Análise de Documentos Públicos**
 
 ## 🗺️ Roadmap
 
