@@ -8,7 +8,8 @@ Ainda temos muita coisa para desenvolver até que esse sonho se torne 100% reali
 
 Se você acredita na ideia e quer fazer parte disso, considere nos apoiar:
 
-<iframe src="https://github.com/sponsors/a21ns1g4ts/card" title="Sponsor a21ns1g4ts" height="225" width="600" style="border: 0;"></iframe>
+[![Apoie no GitHub Sponsors](https://img.shields.io/badge/Apoiar_no_GitHub_Sponsors-💖-ff69b4?style=for-the-badge)](https://github.com/sponsors/a21ns1g4ts)
+
 ❤️ Toda ajuda faz a diferença. Obrigado por caminhar com a gente! 🙌
 
 ## 📌 Visão Geral
