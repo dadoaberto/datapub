@@ -41,7 +41,7 @@ Nosso objetivo é **tornar mais acessíveis e analisáveis informações que est
 │   ├── /downloaders      # Robôs de coleta (scrapers, crawlers, APIs)
 │       ├── al_go.py      # Assembleia Legislativa de GO
 │       ├── al_ms.py      # Assembleia Legislativa de MS
-│       └── estado_sp.py  # Exemplo de órgão estadual
+│       └── ...
 │   ├── /processing       # Pipelines ETL (extração, transformação, carga)
 │   ├── /models           # Modelos de NLP/ML para análise de conteúdo
 │   ├── /api              # Backend (FastAPI)
@@ -52,6 +52,41 @@ Nosso objetivo é **tornar mais acessíveis e analisáveis informações que est
 └── README.md             # Este documento
 ```
 
+---
+# 📂 **DataPub – Sistema de Análise de Documentos Públicos**
+
+## 🗺️ Roadmap
+
+### **Fase 1: Coleta Automatizada (Em Andamento)**
+- [x] Criar scrapers (AL-GO, AL-MS, AL-PE implementados)
+- [ ] Implementar downloaders automatizados com agendamento (schedule)
+- [ ] Adicionar tratamento de erros e redundância de fontes
+
+### **Fase 2: Processamento de Arquivos**
+- [ ] Extração de texto de PDFs/HTMLs (OCR quando necessário)
+- [ ] Limpeza de dados (remoção de lixo digital, normalização)
+
+### **Fase 3: Estruturação de Dados**
+- [ ] Classificação por tipo de documento (contratos, portarias, licitações)
+- [ ] Metadados padronizados (órgão, data, assunto, entidades mencionadas)
+
+### **Fase 4: Análise Inteligente**
+- [ ] Modelos de NLP para detecção de padrões suspeitos
+- [ ] Chatbot de consulta (ex: "Quais contratos com valor acima de R$1M em 2023?")
+
+### **Fase 5: Disponibilização Pública**
+- [ ] API aberta para desenvolvedores
+- [ ] Interface web acessível a não técnicos
+
+## 📌 Fontes Implementadas
+
+| Nome Normalizado | Nome | URL | Status |
+|------------------|------|-----|--------|
+| assembleia_legislativa_do_estado_de_goias_al-go | Assembleia Legislativa do Estado de Goiás (AL-GO) | [Link](https://transparencia.al.go.leg.br/gestao-parlamentar/diario) | ✅ Implementado |
+| assembleia_legislativa_do_estado_de_mato_grosso_do_sul_al-ms | Assembleia Legislativa do Estado de Mato Grosso do Sul (AL-MS) | [Link](https://diariooficial.al.ms.gov.br/) | ✅ Implementado |
+|assembleia_legislativa_do_estado_do_para_al-pa, | Assembléia Legislativa do Estado do Pará (AL-PA) | [Link](https://www.alepa.pa.gov.br/Comunicacao/Diarios/) | ✅ Implementado |
+
+*(Lista completa de fontes disponível no arquivo [sources.csv](data/sources.csv))*
 ---
 
 ## ⚙️ Como Executar
