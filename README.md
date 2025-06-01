@@ -94,29 +94,15 @@ Nosso objetivo é **tornar mais acessíveis e analisáveis informações que est
    pip install -r requirements.txt
    ```
 
-2. **Execute o coletor de um órgão**:
+2. **Execute o coletor de arquivos**:
 
    ```bash
-   python src/downloaders/al_go.py
+   python run_downloader.py al_pa --start 2021-01-1 --end 2025-06-1
    ```
 
 3. **Execute o pipeline de processamento**:
 
-   ```bash
-   python src/processing/process_all.py
-   ```
-
-4. **Suba a API (opcional)**:
-
-   ```bash
-   uvicorn src.api.main:app --reload
-   ```
-
-5. **Inicie a interface de visualização (opcional)**:
-
-   ```bash
-   streamlit run src/frontend/main.py
-   ```
+   // TODO
 
 ---
 
