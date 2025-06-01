@@ -79,11 +79,11 @@ Nosso objetivo é **tornar mais acessíveis e analisáveis informações que est
 
 ## 📌 Fontes Implementadas
 
-| Nome Normalizado | Nome | URL | Status |
-|------------------|------|-----|--------|
-| assembleia_legislativa_do_estado_de_goias_al-go | Assembleia Legislativa do Estado de Goiás (AL-GO) | [Link](https://transparencia.al.go.leg.br/gestao-parlamentar/diario) | ✅ Implementado |
-| assembleia_legislativa_do_estado_de_mato_grosso_do_sul_al-ms | Assembleia Legislativa do Estado de Mato Grosso do Sul (AL-MS) | [Link](https://diariooficial.al.ms.gov.br/) | ✅ Implementado |
-|assembleia_legislativa_do_estado_do_para_al-pa, | Assembléia Legislativa do Estado do Pará (AL-PA) | [Link](https://www.alepa.pa.gov.br/Comunicacao/Diarios/) | ✅ Implementado |
+| Nome | URL | Status |
+|------|-----|--------|
+| Assembleia Legislativa do Estado de Goiás (AL-GO) | [Link](https://transparencia.al.go.leg.br/gestao-parlamentar/diario) | ✅ Implementado |
+| Assembleia Legislativa do Estado de Mato Grosso do Sul (AL-MS) | [Link](https://diariooficial.al.ms.gov.br/) | ✅ Implementado |
+| Assembléia Legislativa do Estado do Pará (AL-PA) | [Link](https://www.alepa.pa.gov.br/Comunicacao/Diarios/) | ✅ Implementado |
 
 *(Lista completa de fontes disponível no arquivo [sources.csv](data/sources.csv))*
 ---
