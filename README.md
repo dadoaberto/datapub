@@ -4,8 +4,6 @@
 
 Para que possamos avançar de verdade, precisamos de uma grande força-tarefa — e isso só será possível com a ajuda de vocês! 💪💙
 
-Ainda temos muita coisa para desenvolver até que esse sonho se torne 100% realidade. Por isso, definimos uma meta inicial de R$600 em doações mensais 🙏. Com esse apoio, poderemos investir mais tempo, dedicação e mão de obra para tirar tudo do papel! 🛠️✨
-
 Se você acredita na ideia e quer fazer parte disso, considere nos apoiar:
 
 [![Apoie no GitHub Sponsors](https://img.shields.io/badge/Apoiar_no_GitHub_Sponsors-💖-ff69b4?style=for-the-badge)](https://github.com/sponsors/a21ns1g4ts)
