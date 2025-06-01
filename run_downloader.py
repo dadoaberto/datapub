@@ -46,16 +46,21 @@ def run_downloader(orgao, args):
     if orgao == "al_go":
         params["start_date"] = parse_date(args.start) if args.start else date(2007, 1, 1)
         params["end_date"] = parse_date(args.end) if args.end else date.today()
-        print(f"🚀 Iniciando download AL-GO de {params['start_date']} a {params['end_date']}")
+        print(f"🚀 Iniciando download ALE-GO de {params['start_date']} a {params['end_date']}")
     
     elif orgao == "al_ms":
         params["start_num"] = int(args.start) if args.start else 1844
         params["end_num"] = int(args.end) if args.end else None
-        print(f"🚀 Iniciando download AL-MS do número {params['start_num']} até {'último disponível' if not params['end_num'] else params['end_num']}")
+        print(f"🚀 Iniciando download ALE-MS do número {params['start_num']} até {'último disponível' if not params['end_num'] else params['end_num']}")
     
     elif orgao == "estado_sp":
         params["year"] = int(args.year) if args.year else datetime.now().year
         print(f"🚀 Iniciando download Estado SP para o ano {params['year']}")
+
+    elif orgao == "ale_pa":
+        params["start_date"] = parse_date(args.start) if args.start else date(2007, 1, 1)
+        params["end_date"] = parse_date(args.end) if args.end else date.today()
+        print(f"🚀 Iniciando download ALE-PA de {params['start_date']} a {params['end_date']}")
     
     # Executa o download
     downloader.download(**params)
@@ -77,6 +82,11 @@ def main():
     # Configuração para Estado SP
     parser_sp = subparsers.add_parser("estado_sp", help="Diários de São Paulo")
     parser_sp.add_argument("--year", help="Ano específico")
+
+    # Configuração para AL-PA
+    parser_alepa = subparsers.add_parser("ale_pa", help="Diários Assembléia Legislativa do Pará")
+    parser_alepa.add_argument("--start", help="Data inicial (YYYY-MM-DD)")
+    parser_alepa.add_argument("--end", help="Data final (YYYY-MM-DD)")
     
     args = parser.parse_args()
     

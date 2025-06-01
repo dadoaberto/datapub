@@ -20,6 +20,8 @@ class Downloader:
         self.metadata_dir = self.base_dir / "metadata"
         self.logs_dir = self.base_dir / "logs"
         
+        self.headless = headless
+        
         # Cria os diretórios se não existirem
         # self.downloads_dir.mkdir(parents=True, exist_ok=True)
         os.makedirs(self.downloads_dir, exist_ok=True)
@@ -47,7 +49,7 @@ class Downloader:
             "download.directory_upgrade": True,
         })
         
-        if headless:
+        if self.headless:
             chrome_options.add_argument("--headless=new")  # headless modo
             chrome_options.add_argument("--disable-gpu")
             chrome_options.add_argument("--no-sandbox")
