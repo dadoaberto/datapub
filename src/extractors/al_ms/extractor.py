@@ -13,7 +13,7 @@ from datetime import datetime
 from pathlib import Path
 from datetime import datetime, timedelta
 
-class Downloader:
+class Extractor:
     def __init__(self, base_dir="data/raw/alms", headless=True):
         self.base_dir = Path(base_dir)
         self.downloads_dir = (self.base_dir / "downloads").resolve()
@@ -164,7 +164,7 @@ class Downloader:
             # Aguarda o download com timeout
             max_wait_time = 30  # segundos
             start_time = time.time()
-            downloaded = False
+            extracted = False
             initial_files = set(self.downloads_dir.glob("*.pdf"))
 
             while (time.time() - start_time) < max_wait_time:
@@ -179,11 +179,11 @@ class Downloader:
                     initial_size = latest_file.stat().st_size
                     time.sleep(2)
                     if latest_file.stat().st_size == initial_size:
-                        downloaded = True
+                        extracted = True
                         break
                 time.sleep(1)
 
-            if not downloaded:
+            if not extracted:
                 print(f"❌ Timeout ao baixar Diário {num_str}")
                 self._log_error(num_str, "Timeout no download")
                 return False
@@ -317,5 +317,5 @@ class Downloader:
         return pdfs
 
 if __name__ == "__main__":
-    downloader = Downloader()
-    downloader.download_range()
+    extractor = Extractor()
+    extractor.download_range()

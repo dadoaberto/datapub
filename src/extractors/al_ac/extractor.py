@@ -7,7 +7,7 @@ from datetime import datetime, timedelta
 from pathlib import Path
 
 
-class Downloader:
+class Extractor:
     def __init__(self, base_dir="data/raw/alac"):
         self.session = requests.Session()
         # Em transição para: https://www.al.ac.leg.br/
@@ -107,9 +107,9 @@ class Downloader:
 
 
 if __name__ == "__main__":
-    downloader = Downloader()
+    extractor = Extractor()
     try:
-        downloader.download(
+        extractor.download(
             start_date=datetime(2015, 1, 1),
             end_date=datetime(2025, 6, 1)
         )

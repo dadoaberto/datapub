@@ -1,0 +1,1371 @@
+[
+  {
+    "nome": "Assembleia Legislativa do Estado de Goiás",
+    "url": "assembleia_legislativa_do_estado_de_goias_al-go",
+    "sigla": "al_go",
+    "extracted": false,
+    "processed": false,
+    "structured": false
+  },
+  {
+    "nome": "Assembleia Legislativa do Estado de Mato Grosso do Sul",
+    "url": "assembleia_legislativa_do_estado_de_mato_grosso_do_sul_al-ms",
+    "sigla": "al_ms",
+    "extracted": false,
+    "processed": false,
+    "structured": false
+  },
+  {
+    "nome": "Assembleia Legislativa do Estado de Minas Gerais",
+    "url": "assembleia_legislativa_do_estado_de_minas_gerais_al-mg",
+    "sigla": "al_mg",
+    "extracted": false,
+    "processed": false,
+    "structured": false
+  },
+  {
+    "nome": "Assembleia Legislativa do Estado de Pernambuco",
+    "url": "assembleia_legislativa_do_estado_de_pernambuco_al-pe",
+    "sigla": "al_pe",
+    "extracted": false,
+    "processed": false,
+    "structured": false
+  },
+  {
+    "nome": "Assembleia Legislativa do Estado de Roraima",
+    "url": "assembleia_legislativa_do_estado_de_roraima_al-rr",
+    "sigla": "al_rr",
+    "extracted": false,
+    "processed": false,
+    "structured": false
+  },
+  {
+    "nome": "Assembleia Legislativa do Estado de Tocantins",
+    "url": "assembleia_legislativa_do_estado_de_tocantins_al-to",
+    "sigla": "al_to",
+    "extracted": false,
+    "processed": false,
+    "structured": false
+  },
+  {
+    "nome": "Assembleia Legislativa do Estado do Maranhão",
+    "url": "assembleia_legislativa_do_estado_do_maranhao_al-ma",
+    "sigla": "al_ma",
+    "extracted": false,
+    "processed": false,
+    "structured": false
+  },
+  {
+    "nome": "Assembleia Legislativa do Estado do Paraná",
+    "url": "assembleia_legislativa_do_estado_do_parana_al-pr",
+    "sigla": "al_pr",
+    "extracted": false,
+    "processed": false,
+    "structured": false
+  },
+  {
+    "nome": "Assembleia Legislativa do Estado do Pará",
+    "url": "assembleia_legislativa_do_estado_do_para_al-pa",
+    "sigla": "al_pa",
+    "extracted": false,
+    "processed": false,
+    "structured": false
+  },
+  {
+    "nome": "Associação Amazonense de Municípios",
+    "url": "associacao_amazonense_de_municipios_aam",
+    "sigla": "aam",
+    "extracted": false,
+    "processed": false,
+    "structured": false
+  },
+  {
+    "nome": "Associação Estadual de Municípios do Rio de Janeiro",
+    "url": "associacao_estadual_de_municipios_do_rio_de_janeiro_aemerj",
+    "sigla": "aemerj",
+    "extracted": false,
+    "processed": false,
+    "structured": false
+  },
+  {
+    "nome": "Associação Goiana de Municípios",
+    "url": "associacao_goiana_de_municipios_agm",
+    "sigla": "agm",
+    "extracted": false,
+    "processed": false,
+    "structured": false
+  },
+  {
+    "nome": "Associação Mato-Grossense dos Municípios",
+    "url": "associacao_mato-grossense_dos_municipios_amm-mt",
+    "sigla": "amm_mt",
+    "extracted": false,
+    "processed": false,
+    "structured": false
+  },
+  {
+    "nome": "Associação Mineira de Municípios",
+    "url": "associacao_mineira_de_municipios_amm-mg",
+    "sigla": "amm_mg",
+    "extracted": false,
+    "processed": false,
+    "structured": false
+  },
+  {
+    "nome": "Associação Municipalista de Pernambuco",
+    "url": "associacao_municipalista_de_pernambuco_amupe",
+    "sigla": "amupe",
+    "extracted": false,
+    "processed": false,
+    "structured": false
+  },
+  {
+    "nome": "Associação Paulista de Municípios",
+    "url": "associacao_paulista_de_municipios_apm",
+    "sigla": "apm",
+    "extracted": false,
+    "processed": false,
+    "structured": false
+  },
+  {
+    "nome": "Associação Rondoniense de Municípios",
+    "url": "associacao_rondoniense_de_municipios_arom",
+    "sigla": "arom",
+    "extracted": false,
+    "processed": false,
+    "structured": false
+  },
+  {
+    "nome": "Associação de Municípios Alagoanos",
+    "url": "associacao_de_municipios_alagoanos_ama",
+    "sigla": "ama",
+    "extracted": false,
+    "processed": false,
+    "structured": false
+  },
+  {
+    "nome": "Associação do Sul, Extremo Sul e Sudoeste da Bahia",
+    "url": "associacao_do_sul_extremo_sul_e_sudoeste_da_bahia_amurc",
+    "sigla": "amurc",
+    "extracted": false,
+    "processed": false,
+    "structured": false
+  },
+  {
+    "nome": "Associação dos Municípios do Mato Grosso do Sul",
+    "url": "associacao_dos_municipios_do_mato_grosso_do_sul_assomasul",
+    "sigla": "assomasul",
+    "extracted": false,
+    "processed": false,
+    "structured": false
+  },
+  {
+    "nome": "Associação dos Municípios do Paraná",
+    "url": "associacao_dos_municipios_do_parana_amp",
+    "sigla": "amp",
+    "extracted": false,
+    "processed": false,
+    "structured": false
+  },
+  {
+    "nome": "Associação dos Municípios e Prefeitos do Estado do Ceará",
+    "url": "associacao_dos_municipios_e_prefeitos_do_estado_do_ceara_aprece",
+    "sigla": "aprece",
+    "extracted": false,
+    "processed": false,
+    "structured": false
+  },
+  {
+    "nome": "CJM12 - Auditoria da 12ª CJM",
+    "url": "cjm12_-_auditoria_da_12_cjm_12cjm",
+    "sigla": "12cjm",
+    "extracted": false,
+    "processed": false,
+    "structured": false
+  },
+  {
+    "nome": "Conselho Nacional de Justiça",
+    "url": "conselho_nacional_de_justica_cnj",
+    "sigla": "cnj",
+    "extracted": false,
+    "processed": false,
+    "structured": false
+  },
+  {
+    "nome": "Conselho Superior da Justiça do Trabalho",
+    "url": "conselho_superior_da_justica_do_trabalho_csjt",
+    "sigla": "csjt",
+    "extracted": false,
+    "processed": false,
+    "structured": false
+  },
+  {
+    "nome": "Corregedoria Regional de Justiça do Trabalho da 16ª Região",
+    "url": "corregedoria_regional_de_justica_do_trabalho_da_16_regiao_pjecortrt16",
+    "sigla": "pjecortrt16",
+    "extracted": false,
+    "processed": false,
+    "structured": false
+  },
+  {
+    "nome": "Corregedoria Regional de Justiça do Trabalho da 23ª Região",
+    "url": "corregedoria_regional_de_justica_do_trabalho_da_23_regiao_pjecortrt23",
+    "sigla": "pjecortrt23",
+    "extracted": false,
+    "processed": false,
+    "structured": false
+  },
+  {
+    "nome": "Corregedoria Regional de Justiça do Trabalho da 5ª Região",
+    "url": "corregedoria_regional_de_justica_do_trabalho_da_5_regiao_pjecortrt5",
+    "sigla": "pjecortrt5",
+    "extracted": false,
+    "processed": false,
+    "structured": false
+  },
+  {
+    "nome": "Diario Oficial - Prefeitura Municipal de Niterói",
+    "url": "diario_oficial_-_prefeitura_municipal_de_niteroi_dom-nit-rj",
+    "sigla": "dom_nit_rj",
+    "extracted": false,
+    "processed": false,
+    "structured": false
+  },
+  {
+    "nome": "Diário Eletrônico da Ordem dos Advogados do Brasil",
+    "url": "diario_eletronico_da_ordem_dos_advogados_do_brasil_deoab",
+    "sigla": "deoab",
+    "extracted": false,
+    "processed": false,
+    "structured": false
+  },
+  {
+    "nome": "Diário Oficial da União",
+    "url": "diario_oficial_da_uniao_dou",
+    "sigla": "dou",
+    "extracted": false,
+    "processed": false,
+    "structured": false
+  },
+  {
+    "nome": "Diário Oficial do Distrito Federal",
+    "url": "diario_oficial_do_distrito_federal_dodf",
+    "sigla": "dodf",
+    "extracted": false,
+    "processed": false,
+    "structured": false
+  },
+  {
+    "nome": "Diário Oficial do Estado da Bahia",
+    "url": "diario_oficial_do_estado_da_bahia_doeba",
+    "sigla": "doe_ba",
+    "extracted": false,
+    "processed": false,
+    "structured": false
+  },
+  {
+    "nome": "Diário Oficial do Estado da Paraíba",
+    "url": "diario_oficial_do_estado_da_paraiba_doepb",
+    "sigla": "doe_pb",
+    "extracted": false,
+    "processed": false,
+    "structured": false
+  },
+  {
+    "nome": "Diário Oficial do Estado de Alagoas",
+    "url": "diario_oficial_do_estado_de_alagoas_doeal",
+    "sigla": "doe_al",
+    "extracted": false,
+    "processed": false,
+    "structured": false
+  },
+  {
+    "nome": "Diário Oficial do Estado de Goiás",
+    "url": "diario_oficial_do_estado_de_goias_doego",
+    "sigla": "doe_go",
+    "extracted": false,
+    "processed": false,
+    "structured": false
+  },
+  {
+    "nome": "Diário Oficial do Estado de Minas Gerais",
+    "url": "diario_oficial_do_estado_de_minas_gerais_doemg",
+    "sigla": "doe_mg",
+    "extracted": false,
+    "processed": false,
+    "structured": false
+  },
+  {
+    "nome": "Diário Oficial do Estado de Pernambuco",
+    "url": "diario_oficial_do_estado_de_pernambuco_doepe",
+    "sigla": "doe_pe",
+    "extracted": false,
+    "processed": false,
+    "structured": false
+  },
+  {
+    "nome": "Diário Oficial do Estado de Rondônia",
+    "url": "diario_oficial_do_estado_de_rondonia_doero",
+    "sigla": "doe_ro",
+    "extracted": false,
+    "processed": false,
+    "structured": false
+  },
+  {
+    "nome": "Diário Oficial do Estado de Roraima",
+    "url": "diario_oficial_do_estado_de_roraima_doerr",
+    "sigla": "doe_rr",
+    "extracted": false,
+    "processed": false,
+    "structured": false
+  },
+  {
+    "nome": "Diário Oficial do Estado de Santa Catarina",
+    "url": "diario_oficial_do_estado_de_santa_catarina_doesc",
+    "sigla": "doe_sc",
+    "extracted": false,
+    "processed": false,
+    "structured": false
+  },
+  {
+    "nome": "Diário Oficial do Estado de Sergipe",
+    "url": "diario_oficial_do_estado_de_sergipe_doese",
+    "sigla": "doe_se",
+    "extracted": false,
+    "processed": false,
+    "structured": false
+  },
+  {
+    "nome": "Diário Oficial do Estado de São Paulo",
+    "url": "diario_oficial_do_estado_de_sao_paulo_dosp",
+    "sigla": "doe_sp",
+    "extracted": false,
+    "processed": false,
+    "structured": false
+  },
+  {
+    "nome": "Diário Oficial do Estado do Acre",
+    "url": "diario_oficial_do_estado_do_acre_doeac",
+    "sigla": "doe_ac",
+    "extracted": false,
+    "processed": false,
+    "structured": false
+  },
+  {
+    "nome": "Diário Oficial do Estado do Amapá",
+    "url": "diario_oficial_do_estado_do_amapa_doeap",
+    "sigla": "doe_ap",
+    "extracted": false,
+    "processed": false,
+    "structured": false
+  },
+  {
+    "nome": "Diário Oficial do Estado do Amazonas",
+    "url": "diario_oficial_do_estado_do_amazonas_doeam",
+    "sigla": "doe_am",
+    "extracted": false,
+    "processed": false,
+    "structured": false
+  },
+  {
+    "nome": "Diário Oficial do Estado do Ceará",
+    "url": "diario_oficial_do_estado_do_ceara_doece",
+    "sigla": "doe_ce",
+    "extracted": false,
+    "processed": false,
+    "structured": false
+  },
+  {
+    "nome": "Diário Oficial do Estado do Espírito Santo",
+    "url": "diario_oficial_do_estado_do_espirito_santo_doees",
+    "sigla": "doe_es",
+    "extracted": false,
+    "processed": false,
+    "structured": false
+  },
+  {
+    "nome": "Diário Oficial do Estado do Maranhão",
+    "url": "diario_oficial_do_estado_do_maranhao_doema",
+    "sigla": "doe_ma",
+    "extracted": false,
+    "processed": false,
+    "structured": false
+  },
+  {
+    "nome": "Diário Oficial do Estado do Mato Grosso",
+    "url": "diario_oficial_do_estado_do_mato_grosso_doemt",
+    "sigla": "doe_mt",
+    "extracted": false,
+    "processed": false,
+    "structured": false
+  },
+  {
+    "nome": "Diário Oficial do Estado do Mato Grosso do Sul",
+    "url": "diario_oficial_do_estado_do_mato_grosso_do_sul_doems",
+    "sigla": "doe_ms",
+    "extracted": false,
+    "processed": false,
+    "structured": false
+  },
+  {
+    "nome": "Diário Oficial do Estado do Paraná",
+    "url": "diario_oficial_do_estado_do_parana_doepr",
+    "sigla": "doe_pr",
+    "extracted": false,
+    "processed": false,
+    "structured": false
+  },
+  {
+    "nome": "Diário Oficial do Estado do Pará",
+    "url": "diario_oficial_do_estado_do_para_doepa",
+    "sigla": "doe_pa",
+    "extracted": false,
+    "processed": false,
+    "structured": false
+  },
+  {
+    "nome": "Diário Oficial do Estado do Piauí",
+    "url": "diario_oficial_do_estado_do_piaui_doepi",
+    "sigla": "doe_pi",
+    "extracted": false,
+    "processed": false,
+    "structured": false
+  },
+  {
+    "nome": "Diário Oficial do Estado do Rio Grande do Norte",
+    "url": "diario_oficial_do_estado_do_rio_grande_do_norte_doern",
+    "sigla": "doe_rn",
+    "extracted": false,
+    "processed": false,
+    "structured": false
+  },
+  {
+    "nome": "Diário Oficial do Estado do Rio Grande do Sul",
+    "url": "diario_oficial_do_estado_do_rio_grande_do_sul_doers",
+    "sigla": "doe_rs",
+    "extracted": false,
+    "processed": false,
+    "structured": false
+  },
+  {
+    "nome": "Diário Oficial do Estado do Rio de Janeiro",
+    "url": "diario_oficial_do_estado_do_rio_de_janeiro_doerj",
+    "sigla": "doe_rj",
+    "extracted": false,
+    "processed": false,
+    "structured": false
+  },
+  {
+    "nome": "Diário Oficial do Estado do Tocantins",
+    "url": "diario_oficial_do_estado_do_tocantins_doeto",
+    "sigla": "doe_to",
+    "extracted": false,
+    "processed": false,
+    "structured": false
+  },
+  {
+    "nome": "Diário Oficial do Município de Americana",
+    "url": "diario_oficial_do_municipio_de_americana_dom-americ",
+    "sigla": "dom_americ",
+    "extracted": false,
+    "processed": false,
+    "structured": false
+  },
+  {
+    "nome": "Diário Oficial do Município de Barueri",
+    "url": "diario_oficial_do_municipio_de_barueri_dom-bru",
+    "sigla": "dom_bru",
+    "extracted": false,
+    "processed": false,
+    "structured": false
+  },
+  {
+    "nome": "Diário Oficial do Município de Bauru",
+    "url": "diario_oficial_do_municipio_de_bauru_dom-bauru",
+    "sigla": "dom_bauru",
+    "extracted": false,
+    "processed": false,
+    "structured": false
+  },
+  {
+    "nome": "Diário Oficial do Município de Belém",
+    "url": "diario_oficial_do_municipio_de_belem_dom-belem",
+    "sigla": "dom_belem",
+    "extracted": false,
+    "processed": false,
+    "structured": false
+  },
+  {
+    "nome": "Diário Oficial do Município de Boa Vista",
+    "url": "diario_oficial_do_municipio_de_boa_vista_dom-bvb",
+    "sigla": "dom_bvb",
+    "extracted": false,
+    "processed": false,
+    "structured": false
+  },
+  {
+    "nome": "Diário Oficial do Município de Camaçari",
+    "url": "diario_oficial_do_municipio_de_camacari_dom-camacari",
+    "sigla": "dom_camacari",
+    "extracted": false,
+    "processed": false,
+    "structured": false
+  },
+  {
+    "nome": "Diário Oficial do Município de Campinas",
+    "url": "diario_oficial_do_municipio_de_campinas_dom-camp",
+    "sigla": "dom_camp",
+    "extracted": false,
+    "processed": false,
+    "structured": false
+  },
+  {
+    "nome": "Diário Oficial do Município de Campo Grande",
+    "url": "diario_oficial_do_municipio_de_campo_grande_dom-campog",
+    "sigla": "dom_campog",
+    "extracted": false,
+    "processed": false,
+    "structured": false
+  },
+  {
+    "nome": "Diário Oficial do Município de Campos dos Goytacazes",
+    "url": "diario_oficial_do_municipio_de_campos_dos_goytacazes_dom-goy-rj",
+    "sigla": "dom_goy_rj",
+    "extracted": false,
+    "processed": false,
+    "structured": false
+  },
+  {
+    "nome": "Diário Oficial do Município de Caxias do Sul",
+    "url": "diario_oficial_do_municipio_de_caxias_do_sul_dom-cxs",
+    "sigla": "dom_cxs",
+    "extracted": false,
+    "processed": false,
+    "structured": false
+  },
+  {
+    "nome": "Diário Oficial do Município de Curitiba",
+    "url": "diario_oficial_do_municipio_de_curitiba_dom-ctba",
+    "sigla": "dom_ctba",
+    "extracted": false,
+    "processed": false,
+    "structured": false
+  },
+  {
+    "nome": "Diário Oficial do Município de Duque de Caxias",
+    "url": "diario_oficial_do_municipio_de_duque_de_caxias_dom-dcs",
+    "sigla": "dom_dcs",
+    "extracted": false,
+    "processed": false,
+    "structured": false
+  },
+  {
+    "nome": "Diário Oficial do Município de Florianópolis",
+    "url": "diario_oficial_do_municipio_de_florianopolis_dom-fln-sc",
+    "sigla": "dom_fln_sc",
+    "extracted": false,
+    "processed": false,
+    "structured": false
+  },
+  {
+    "nome": "Diário Oficial do Município de Fortaleza",
+    "url": "diario_oficial_do_municipio_de_fortaleza_dom-for",
+    "sigla": "dom_for",
+    "extracted": false,
+    "processed": false,
+    "structured": false
+  },
+  {
+    "nome": "Diário Oficial do Município de Goiânia",
+    "url": "diario_oficial_do_municipio_de_goiania_dom-gyn",
+    "sigla": "dom_gyn",
+    "extracted": false,
+    "processed": false,
+    "structured": false
+  },
+  {
+    "nome": "Diário Oficial do Município de Guarulhos",
+    "url": "diario_oficial_do_municipio_de_guarulhos_dom-gru",
+    "sigla": "dom_gru",
+    "extracted": false,
+    "processed": false,
+    "structured": false
+  },
+  {
+    "nome": "Diário Oficial do Município de João Pessoa",
+    "url": "diario_oficial_do_municipio_de_joao_pessoa_dom-jpa",
+    "sigla": "dom_jpa",
+    "extracted": false,
+    "processed": false,
+    "structured": false
+  },
+  {
+    "nome": "Diário Oficial do Município de Macapá",
+    "url": "diario_oficial_do_municipio_de_macapa_dom-macapa",
+    "sigla": "dom_macapa",
+    "extracted": false,
+    "processed": false,
+    "structured": false
+  },
+  {
+    "nome": "Diário Oficial do Município de Maceió",
+    "url": "diario_oficial_do_municipio_de_maceio_dom-maceio",
+    "sigla": "dom_maceio",
+    "extracted": false,
+    "processed": false,
+    "structured": false
+  },
+  {
+    "nome": "Diário Oficial do Município de Manaus",
+    "url": "diario_oficial_do_municipio_de_manaus_dom-manaus",
+    "sigla": "dom_manaus",
+    "extracted": false,
+    "processed": false,
+    "structured": false
+  },
+  {
+    "nome": "Diário Oficial do Município de Marília",
+    "url": "diario_oficial_do_municipio_de_marilia_dom-mar",
+    "sigla": "dom_mar",
+    "extracted": false,
+    "processed": false,
+    "structured": false
+  },
+  {
+    "nome": "Diário Oficial do Município de Natal",
+    "url": "diario_oficial_do_municipio_de_natal_dom-natal",
+    "sigla": "dom_natal",
+    "extracted": false,
+    "processed": false,
+    "structured": false
+  },
+  {
+    "nome": "Diário Oficial do Município de Osasco",
+    "url": "diario_oficial_do_municipio_de_osasco_dom-osasco",
+    "sigla": "dom_osasco",
+    "extracted": false,
+    "processed": false,
+    "structured": false
+  },
+  {
+    "nome": "Diário Oficial do Município de Palmas",
+    "url": "diario_oficial_do_municipio_de_palmas_dom-pmw",
+    "sigla": "dom_pmw",
+    "extracted": false,
+    "processed": false,
+    "structured": false
+  },
+  {
+    "nome": "Diário Oficial do Município de Ponta Porã",
+    "url": "diario_oficial_do_municipio_de_ponta_pora_dom-pmg-ms",
+    "sigla": "dom_pmg_ms",
+    "extracted": false,
+    "processed": false,
+    "structured": false
+  },
+  {
+    "nome": "Diário Oficial do Município de Porto Alegre",
+    "url": "diario_oficial_do_municipio_de_porto_alegre_dom-poa",
+    "sigla": "dom_poa",
+    "extracted": false,
+    "processed": false,
+    "structured": false
+  },
+  {
+    "nome": "Diário Oficial do Município de Porto Velho",
+    "url": "diario_oficial_do_municipio_de_porto_velho_dom-pvh",
+    "sigla": "dom_pvh",
+    "extracted": false,
+    "processed": false,
+    "structured": false
+  },
+  {
+    "nome": "Diário Oficial do Município de Salvador",
+    "url": "diario_oficial_do_municipio_de_salvador_dom-ssa",
+    "sigla": "dom_ssa",
+    "extracted": false,
+    "processed": false,
+    "structured": false
+  },
+  {
+    "nome": "Diário Oficial do Município de Santos",
+    "url": "diario_oficial_do_municipio_de_santos_dom-santos",
+    "sigla": "dom_santos",
+    "extracted": false,
+    "processed": false,
+    "structured": false
+  },
+  {
+    "nome": "Diário Oficial do Município de Sorocaba",
+    "url": "diario_oficial_do_municipio_de_sorocaba_dom-sod-sp",
+    "sigla": "dom_sod_sp",
+    "extracted": false,
+    "processed": false,
+    "structured": false
+  },
+  {
+    "nome": "Diário Oficial do Município de São Bernardo do Campo",
+    "url": "diario_oficial_do_municipio_de_sao_bernardo_do_campo_dom-sbc",
+    "sigla": "dom_sbc",
+    "extracted": false,
+    "processed": false,
+    "structured": false
+  },
+  {
+    "nome": "Diário Oficial do Município de São Gonçalo",
+    "url": "diario_oficial_do_municipio_de_sao_goncalo_dom-qsd-rj",
+    "sigla": "dom_qsd_rj",
+    "extracted": false,
+    "processed": false,
+    "structured": false
+  },
+  {
+    "nome": "Diário Oficial do Município de São Luís",
+    "url": "diario_oficial_do_municipio_de_sao_luis_dom-slz",
+    "sigla": "dom_slz",
+    "extracted": false,
+    "processed": false,
+    "structured": false
+  },
+  {
+    "nome": "Diário Oficial do Município de São Paulo",
+    "url": "diario_oficial_do_municipio_de_sao_paulo_dom-sp",
+    "sigla": "dom_sp",
+    "extracted": false,
+    "processed": false,
+    "structured": false
+  },
+  {
+    "nome": "Diário Oficial do Município de Teresina",
+    "url": "diario_oficial_do_municipio_de_teresina_dom-the",
+    "sigla": "dom_the",
+    "extracted": false,
+    "processed": false,
+    "structured": false
+  },
+  {
+    "nome": "Diário Oficial do Município de Uberaba",
+    "url": "diario_oficial_do_municipio_de_uberaba_dom-ubera",
+    "sigla": "dom_ubera",
+    "extracted": false,
+    "processed": false,
+    "structured": false
+  },
+  {
+    "nome": "Diário Oficial do Município de Uberlândia",
+    "url": "diario_oficial_do_municipio_de_uberlandia_dom-uberl",
+    "sigla": "dom_uberl",
+    "extracted": false,
+    "processed": false,
+    "structured": false
+  },
+  {
+    "nome": "Diário Oficial do Município de Vitória",
+    "url": "diario_oficial_do_municipio_de_vitoria_dom-vix",
+    "sigla": "dom_vix",
+    "extracted": false,
+    "processed": false,
+    "structured": false
+  },
+  {
+    "nome": "Diário Oficial dos Municípios Capixabas",
+    "url": "diario_oficial_dos_municipios_capixabas_dom-capix",
+    "sigla": "dom_capix",
+    "extracted": false,
+    "processed": false,
+    "structured": false
+  },
+  {
+    "nome": "Diário Oficial dos Municípios de Santa Catarina",
+    "url": "diario_oficial_dos_municipios_de_santa_catarina_dom-sc",
+    "sigla": "dom_sc",
+    "extracted": false,
+    "processed": false,
+    "structured": false
+  },
+  {
+    "nome": "Diário da Justiça Militar do Estado de Minas Gerais",
+    "url": "diario_da_justica_militar_do_estado_de_minas_gerais_djmmg",
+    "sigla": "djm_mg",
+    "extracted": false,
+    "processed": false,
+    "structured": false
+  },
+  {
+    "nome": "Diário da Justiça Militar do Estado de São Paulo",
+    "url": "diario_da_justica_militar_do_estado_de_sao_paulo_djmsp",
+    "sigla": "djm_sp",
+    "extracted": false,
+    "processed": false,
+    "structured": false
+  },
+  {
+    "nome": "Diário de Justiça da União",
+    "url": "diario_de_justica_da_uniao_dju",
+    "sigla": "dju",
+    "extracted": false,
+    "processed": false,
+    "structured": false
+  },
+  {
+    "nome": "Diário de Justiça do Distrito Federal",
+    "url": "diario_de_justica_do_distrito_federal_djdf",
+    "sigla": "djdf",
+    "extracted": false,
+    "processed": false,
+    "structured": false
+  },
+  {
+    "nome": "Diário de Justiça do Estado da Bahia",
+    "url": "diario_de_justica_do_estado_da_bahia_djba",
+    "sigla": "djba",
+    "extracted": false,
+    "processed": false,
+    "structured": false
+  },
+  {
+    "nome": "Diário de Justiça do Estado da Paraíba",
+    "url": "diario_de_justica_do_estado_da_paraiba_djpb",
+    "sigla": "djpb",
+    "extracted": false,
+    "processed": false,
+    "structured": false
+  },
+  {
+    "nome": "Diário de Justiça do Estado de Alagoas",
+    "url": "diario_de_justica_do_estado_de_alagoas_djal",
+    "sigla": "djal",
+    "extracted": false,
+    "processed": false,
+    "structured": false
+  },
+  {
+    "nome": "Diário de Justiça do Estado de Goiás",
+    "url": "diario_de_justica_do_estado_de_goias_djgo",
+    "sigla": "djgo",
+    "extracted": false,
+    "processed": false,
+    "structured": false
+  },
+  {
+    "nome": "Diário de Justiça do Estado de Minas Gerais",
+    "url": "diario_de_justica_do_estado_de_minas_gerais_djmg",
+    "sigla": "djmg",
+    "extracted": false,
+    "processed": false,
+    "structured": false
+  },
+  {
+    "nome": "Diário de Justiça do Estado de Pernambuco",
+    "url": "diario_de_justica_do_estado_de_pernambuco_djpe",
+    "sigla": "djpe",
+    "extracted": false,
+    "processed": false,
+    "structured": false
+  },
+  {
+    "nome": "Diário de Justiça do Estado de Rondônia",
+    "url": "diario_de_justica_do_estado_de_rondonia_djro",
+    "sigla": "djro",
+    "extracted": false,
+    "processed": false,
+    "structured": false
+  },
+  {
+    "nome": "Diário de Justiça do Estado de Roraima",
+    "url": "diario_de_justica_do_estado_de_roraima_djrr",
+    "sigla": "djrr",
+    "extracted": false,
+    "processed": false,
+    "structured": false
+  },
+  {
+    "nome": "Diário de Justiça do Estado de Santa Catarina",
+    "url": "diario_de_justica_do_estado_de_santa_catarina_djsc",
+    "sigla": "djsc",
+    "extracted": false,
+    "processed": false,
+    "structured": false
+  },
+  {
+    "nome": "Diário de Justiça do Estado de Sergipe",
+    "url": "diario_de_justica_do_estado_de_sergipe_djse",
+    "sigla": "djse",
+    "extracted": false,
+    "processed": false,
+    "structured": false
+  },
+  {
+    "nome": "Diário de Justiça do Estado de São Paulo",
+    "url": "diario_de_justica_do_estado_de_sao_paulo_djsp",
+    "sigla": "djsp",
+    "extracted": false,
+    "processed": false,
+    "structured": false
+  },
+  {
+    "nome": "Diário de Justiça do Estado de Tocantins",
+    "url": "diario_de_justica_do_estado_de_tocantins_djto",
+    "sigla": "djto",
+    "extracted": false,
+    "processed": false,
+    "structured": false
+  },
+  {
+    "nome": "Diário de Justiça do Estado do Acre",
+    "url": "diario_de_justica_do_estado_do_acre_djac",
+    "sigla": "djac",
+    "extracted": false,
+    "processed": false,
+    "structured": false
+  },
+  {
+    "nome": "Diário de Justiça do Estado do Amapá",
+    "url": "diario_de_justica_do_estado_do_amapa_djap",
+    "sigla": "djap",
+    "extracted": false,
+    "processed": false,
+    "structured": false
+  },
+  {
+    "nome": "Diário de Justiça do Estado do Amazonas",
+    "url": "diario_de_justica_do_estado_do_amazonas_djam",
+    "sigla": "djam",
+    "extracted": false,
+    "processed": false,
+    "structured": false
+  },
+  {
+    "nome": "Diário de Justiça do Estado do Ceará",
+    "url": "diario_de_justica_do_estado_do_ceara_djce",
+    "sigla": "djce",
+    "extracted": false,
+    "processed": false,
+    "structured": false
+  },
+  {
+    "nome": "Diário de Justiça do Estado do Maranhão",
+    "url": "diario_de_justica_do_estado_do_maranhao_djma",
+    "sigla": "djma",
+    "extracted": false,
+    "processed": false,
+    "structured": false
+  },
+  {
+    "nome": "Diário de Justiça do Estado do Mato Grosso",
+    "url": "diario_de_justica_do_estado_do_mato_grosso_djmt",
+    "sigla": "djmt",
+    "extracted": false,
+    "processed": false,
+    "structured": false
+  },
+  {
+    "nome": "Diário de Justiça do Estado do Mato Grosso do Sul",
+    "url": "diario_de_justica_do_estado_do_mato_grosso_do_sul_djms",
+    "sigla": "djms",
+    "extracted": false,
+    "processed": false,
+    "structured": false
+  },
+  {
+    "nome": "Diário de Justiça do Estado do Paraná",
+    "url": "diario_de_justica_do_estado_do_parana_djpr",
+    "sigla": "djpr",
+    "extracted": false,
+    "processed": false,
+    "structured": false
+  },
+  {
+    "nome": "Diário de Justiça do Estado do Pará",
+    "url": "diario_de_justica_do_estado_do_para_djpa",
+    "sigla": "djpa",
+    "extracted": false,
+    "processed": false,
+    "structured": false
+  },
+  {
+    "nome": "Diário de Justiça do Estado do Piauí",
+    "url": "diario_de_justica_do_estado_do_piaui_djpi",
+    "sigla": "djpi",
+    "extracted": false,
+    "processed": false,
+    "structured": false
+  },
+  {
+    "nome": "Diário de Justiça do Estado do Rio Grande do Norte",
+    "url": "diario_de_justica_do_estado_do_rio_grande_do_norte_djrn",
+    "sigla": "djrn",
+    "extracted": false,
+    "processed": false,
+    "structured": false
+  },
+  {
+    "nome": "Diário de Justiça do Estado do Rio Grande do Sul",
+    "url": "diario_de_justica_do_estado_do_rio_grande_do_sul_djrs",
+    "sigla": "djrs",
+    "extracted": false,
+    "processed": false,
+    "structured": false
+  },
+  {
+    "nome": "Diário de Justiça do Estado do Rio de Janeiro",
+    "url": "diario_de_justica_do_estado_do_rio_de_janeiro_djrj",
+    "sigla": "djrj",
+    "extracted": false,
+    "processed": false,
+    "structured": false
+  },
+  {
+    "nome": "Federação Goiana de Municípios",
+    "url": "federacao_goiana_de_municipios_fgm",
+    "sigla": "fgm",
+    "extracted": false,
+    "processed": false,
+    "structured": false
+  },
+  {
+    "nome": "Federação das Associações de Municípios da Paraíba",
+    "url": "federacao_das_associacoes_de_municipios_da_paraiba_famup",
+    "sigla": "famup",
+    "extracted": false,
+    "processed": false,
+    "structured": false
+  },
+  {
+    "nome": "Federação das Associações de Municípios do Estado do Pará",
+    "url": "federacao_das_associacoes_de_municipios_do_estado_do_para_famep",
+    "sigla": "famep",
+    "extracted": false,
+    "processed": false,
+    "structured": false
+  },
+  {
+    "nome": "Federação das Associações de Municípios do Rio Grande do Sul",
+    "url": "federacao_das_associacoes_de_municipios_do_rio_grande_do_sul_famurs",
+    "sigla": "famurs",
+    "extracted": false,
+    "processed": false,
+    "structured": false
+  },
+  {
+    "nome": "Federação dos Municípios do Rio Grande do Norte",
+    "url": "federacao_dos_municipios_do_rio_grande_do_norte_femurn",
+    "sigla": "femurn",
+    "extracted": false,
+    "processed": false,
+    "structured": false
+  },
+
+  {
+    "nome": "Ministério Público de Pernambuco",
+    "url": "ministerio_publico_de_pernambuco_mp-pe",
+    "sigla": "mp_pe",
+    "extracted": false,
+    "processed": false,
+    "structured": false
+  },
+  {
+    "nome": "Ministério Público do Estado da Santa Catarina",
+    "url": "ministerio_publico_do_estado_da_santa_catarina_mp-sc",
+    "sigla": "mp_sc",
+    "extracted": false,
+    "processed": false,
+    "structured": false
+  },
+  {
+    "nome": "Ministério Público do Estado de Minas Gerais",
+    "url": "ministerio_publico_do_estado_de_minas_gerais_mp-mg",
+    "sigla": "mp_mg",
+    "extracted": false,
+    "processed": false,
+    "structured": false
+  },
+  {
+    "nome": "Ministério Público do Estado do Amapá",
+    "url": "ministerio_publico_do_estado_do_amapa_mp-ap",
+    "sigla": "mp_ap",
+    "extracted": false,
+    "processed": false,
+    "structured": false
+  },
+  {
+    "nome": "Ministério Público do Estado do Mato Grosso do Sul",
+    "url": "ministerio_publico_do_estado_do_mato_grosso_do_sul_mp-ms",
+    "sigla": "mp_ms",
+    "extracted": false,
+    "processed": false,
+    "structured": false
+  },
+  {
+    "nome": "Ministério Público do Estado do Rio Grande do Sul",
+    "url": "ministerio_publico_do_estado_do_rio_grande_do_sul_mp-rs",
+    "sigla": "mp_rs",
+    "extracted": false,
+    "processed": false,
+    "structured": false
+  },
+  {
+    "nome": "PJECOR - Corregedoria Geral",
+    "url": "pjecor_-_corregedoria_geral_pjecoroutros",
+    "sigla": "pjecoroutros",
+    "extracted": false,
+    "processed": false,
+    "structured": false
+  },
+  {
+    "nome": "Revista da Propriedade Industrial",
+    "url": "revista_da_propriedade_industrial_rpi",
+    "sigla": "rpi",
+    "extracted": false,
+    "processed": false,
+    "structured": false
+  },
+  {
+    "nome": "SEEU - Diário de Justiça do Estado do Acre",
+    "url": "seeu_-_diario_de_justica_do_estado_do_acre_seeu-tjac",
+    "sigla": "seeu_tjac",
+    "extracted": false,
+    "processed": false,
+    "structured": false
+  },
+  {
+    "nome": "SEEU - Justiça Federal no Rio Grande do Norte",
+    "url": "seeu_-_justica_federal_no_rio_grande_do_norte_seeu-sjrn",
+    "sigla": "seeu_sjrn",
+    "extracted": false,
+    "processed": false,
+    "structured": false
+  },
+  {
+    "nome": "SEEU - Tribunal Regional Federal da 2ª Região",
+    "url": "seeu_-_tribunal_regional_federal_da_2_regiao_seeu-trf2",
+    "sigla": "seeu_trf2",
+    "extracted": false,
+    "processed": false,
+    "structured": false
+  },
+  {
+    "nome": "SEEU - Tribunal Regional Federal da 5ª Região",
+    "url": "seeu_-_tribunal_regional_federal_da_5_regiao_seeu-trf5",
+    "sigla": "seeu_trf5",
+    "extracted": false,
+    "processed": false,
+    "structured": false
+  },
+  {
+    "nome": "SEEU - Tribunal de Justiça Militar de Minas Gerais",
+    "url": "seeu_-_tribunal_de_justica_militar_de_minas_gerais_seeu-tjmmg",
+    "sigla": "seeu_tjmmg",
+    "extracted": false,
+    "processed": false,
+    "structured": false
+  },
+  {
+    "nome": "SEEU - Tribunal de Justiça de Alagoas",
+    "url": "seeu_-_tribunal_de_justica_de_alagoas_seeu-tjal",
+    "sigla": "seeu_tjal",
+    "extracted": false,
+    "processed": false,
+    "structured": false
+  },
+  {
+    "nome": "SEEU - Tribunal de Justiça de Rondônia",
+    "url": "seeu_-_tribunal_de_justica_de_rondonia_seeu-tjro",
+    "sigla": "seeu_tjro",
+    "extracted": false,
+    "processed": false,
+    "structured": false
+  },
+  {
+    "nome": "SEEU - Tribunal de Justiça do Estado do Espírito Santo",
+    "url": "seeu_-_tribunal_de_justica_do_estado_do_espirito_santo_seeu-tjes",
+    "sigla": "seeu_tjes",
+    "extracted": false,
+    "processed": false,
+    "structured": false
+  },
+  {
+    "nome": "SEEU - Tribunal de Justiça do Piauí",
+    "url": "seeu_-_tribunal_de_justica_do_piaui_seeu-tjpi",
+    "sigla": "seeu_tjpi",
+    "extracted": false,
+    "processed": false,
+    "structured": false
+  },
+  {
+    "nome": "SEEU CJM4 - Auditoria da 4ª CJM - Aberto",
+    "url": "seeu_cjm4_-_auditoria_da_4_cjm_-_aberto_seeu-4cjm",
+    "sigla": "seeu_4cjm",
+    "extracted": false,
+    "processed": false,
+    "structured": false
+  },
+  {
+    "nome": "Sistema Eletrônico de Execução Unificado do TJAP",
+    "url": "sistema_eletronico_de_execucao_unificado_do_tjap_seeu-tjap",
+    "sigla": "seeu_tjap",
+    "extracted": false,
+    "processed": false,
+    "structured": false
+  },
+  {
+    "nome": "Sistema Eletrônico de Execução Unificado do TJDFT",
+    "url": "sistema_eletronico_de_execucao_unificado_do_tjdft_seeu-tjdft",
+    "sigla": "seeu_tjdft",
+    "extracted": false,
+    "processed": false,
+    "structured": false
+  },
+  {
+    "nome": "Sistema Eletrônico de Execução Unificado do TJPE",
+    "url": "sistema_eletronico_de_execucao_unificado_do_tjpe_seeu-tjpe",
+    "sigla": "seeu_tjpe",
+    "extracted": false,
+    "processed": false,
+    "structured": false
+  },
+  {
+    "nome": "Sistema Eletrônico de Execução Unificado do TRF6",
+    "url": "sistema_eletronico_de_execucao_unificado_do_trf6_seeu-trf6",
+    "sigla": "seeu_trf6",
+    "extracted": false,
+    "processed": false,
+    "structured": false
+  },
+  {
+    "nome": "Sistema Eletrônico de Execução Unificado do Tribunal de Justiça da Par",
+    "url": "sistema_eletronico_de_execucao_unificado_do_tribunal_de_justica_da_par_seeu-tjpb",
+    "sigla": "seeu_tjpb",
+    "extracted": false,
+    "processed": false,
+    "structured": false
+  },
+  {
+    "nome": "Superior Tribunal Militar",
+    "url": "superior_tribunal_militar_stm",
+    "sigla": "stm",
+    "extracted": false,
+    "processed": false,
+    "structured": false
+  },
+  {
+    "nome": "Superior Tribunal de Justiça",
+    "url": "superior_tribunal_de_justica_stj",
+    "sigla": "stj",
+    "extracted": false,
+    "processed": false,
+    "structured": false
+  },
+  {
+    "nome": "Tribunal Regional do Trabalho da 23ª Região",
+    "url": "tribunal_regional_do_trabalho_da_23_regiao_trt-23",
+    "sigla": "trt_23",
+    "extracted": false,
+    "processed": false,
+    "structured": false
+  },
+  {
+    "nome": "Tribunal Regional do Trabalho da 24ª Região",
+    "url": "tribunal_regional_do_trabalho_da_24_regiao_trt-24",
+    "sigla": "trt_24",
+    "extracted": false,
+    "processed": false,
+    "structured": false
+  },
+  {
+    "nome": "Tribunal Regional do Trabalho da 2ª Região",
+    "url": "tribunal_regional_do_trabalho_da_2_regiao_trt-2",
+    "sigla": "trt_2",
+    "extracted": false,
+    "processed": false,
+    "structured": false
+  },
+  {
+    "nome": "Tribunal Regional do Trabalho da 3ª Região",
+    "url": "tribunal_regional_do_trabalho_da_3_regiao_trt-3",
+    "sigla": "trt_3",
+    "extracted": false,
+    "processed": false,
+    "structured": false
+  },
+  {
+    "nome": "Tribunal Regional do Trabalho da 4ª Região",
+    "url": "tribunal_regional_do_trabalho_da_4_regiao_trt-4",
+    "sigla": "trt_4",
+    "extracted": false,
+    "processed": false,
+    "structured": false
+  },
+  {
+    "nome": "Tribunal Regional do Trabalho da 5ª Região",
+    "url": "tribunal_regional_do_trabalho_da_5_regiao_trt-5",
+    "sigla": "trt_5",
+    "extracted": false,
+    "processed": false,
+    "structured": false
+  },
+  {
+    "nome": "Tribunal Regional do Trabalho da 6ª Região",
+    "url": "tribunal_regional_do_trabalho_da_6_regiao_trt-6",
+    "sigla": "trt_6",
+    "extracted": false,
+    "processed": false,
+    "structured": false
+  },
+  {
+    "nome": "Tribunal Regional do Trabalho da 7ª Região",
+    "url": "tribunal_regional_do_trabalho_da_7_regiao_trt-7",
+    "sigla": "trt_7",
+    "extracted": false,
+    "processed": false,
+    "structured": false
+  },
+  {
+    "nome": "Tribunal Regional do Trabalho da 8ª Região",
+    "url": "tribunal_regional_do_trabalho_da_8_regiao_trt-8",
+    "sigla": "trt_8",
+    "extracted": false,
+    "processed": false,
+    "structured": false
+  },
+  {
+    "nome": "Tribunal Regional do Trabalho da 9ª Região",
+    "url": "tribunal_regional_do_trabalho_da_9_regiao_trt-9",
+    "sigla": "trt_9",
+    "extracted": false,
+    "processed": false,
+    "structured": false
+  },
+  {
+    "nome": "Tribunal Superior Eleitoral",
+    "url": "tribunal_superior_eleitoral_tse",
+    "sigla": "tse",
+    "extracted": false,
+    "processed": false,
+    "structured": false
+  },
+  {
+    "nome": "Tribunal Superior do Trabalho",
+    "url": "tribunal_superior_do_trabalho_tst",
+    "sigla": "tst",
+    "extracted": false,
+    "processed": false,
+    "structured": false
+  },
+  {
+    "nome": "Tribunal de Justiça Militar do Rio Grande do Sul",
+    "url": "tribunal_de_justica_militar_do_rio_grande_do_sul_tjm-rs",
+    "sigla": "tjm_rs",
+    "extracted": false,
+    "processed": false,
+    "structured": false
+  },
+  {
+    "nome": "Tribunal de Justiça do Espírito Santo",
+    "url": "tribunal_de_justica_do_espirito_santo_tj-es",
+    "sigla": "tj_es",
+    "extracted": false,
+    "processed": false,
+    "structured": false
+  }
+]

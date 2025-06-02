@@ -17,7 +17,7 @@ from selenium.webdriver import ActionChains
 from selenium.webdriver.common.keys import Keys
 
 
-class Downloader:
+class Extractor:
     def __init__(self, base_dir="data/raw/alpa",  headless=True):
         self.headless = headless
         self.base_url = "https://www.alepa.pa.gov.br/Comunicacao/Diarios"
@@ -143,10 +143,10 @@ class Downloader:
 
 
 if __name__ == "__main__":
-    downloader = Downloader()
+    extractor = Extractor()
     try:
         start = datetime(2021, 1, 1)
         end = datetime(2025, 1, 6)
-        downloader.download_range(start, end)
+        extractor.download_range(start, end)
     finally:
-        downloader.close()
+        extractor.close()

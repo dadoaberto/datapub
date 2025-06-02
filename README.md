@@ -1,15 +1,5 @@
 # 📂 **DataPub – Sistema de Análise de Documentos Públicos**
 
-🚀 Vamos juntos fazer esse projeto acontecer! 💡
-
-Para que possamos avançar de verdade, precisamos de uma grande força-tarefa — e isso só será possível com a ajuda de vocês! 💪💙
-
-Se você acredita na ideia e quer fazer parte disso, considere nos apoiar:
-
-[![Apoie no GitHub Sponsors](https://img.shields.io/badge/Apoiar_no_GitHub_Sponsors-💖-ff69b4?style=for-the-badge)](https://github.com/sponsors/a21ns1g4ts)
-
-❤️ Toda ajuda faz a diferença. Obrigado por caminhar com a gente! 🙌
-
 ## 📌 Visão Geral
 
 **DataPub** é uma plataforma para **coleta, processamento, estruturação e análise de documentos públicos brasileiros**, incluindo **Diários Oficiais, contratos, portarias, atos administrativos e demais publicações governamentais**.
@@ -52,7 +42,7 @@ Você pode acessar os dados por meio do seguinte endpoint (via CloudFront):
 │   └── /structured       # Dados estruturados (JSON, CSV, banco de dados)
 │
 ├── /src
-│   ├── /downloaders      # Robôs de coleta (scrapers, crawlers, APIs)
+│   ├── /extractors      # Robôs de coleta (scrapers, crawlers, APIs)
 │       ├── al_go.py      # Assembleia Legislativa de GO
 │       ├── al_ms.py      # Assembleia Legislativa de MS
 │       └── ...
@@ -68,42 +58,6 @@ Você pode acessar os dados por meio do seguinte endpoint (via CloudFront):
 
 ---
 
-## 🗺️ Roadmap
-
-### **Fase 1: Coleta Automatizada (Em Andamento)**
-- [x] Criar scrapers (AL-GO, AL-MS, AL-PE implementados)
-- [ ] Implementar downloaders automatizados com agendamento (schedule)
-- [ ] Adicionar tratamento de erros e redundância de fontes
-
-### **Fase 2: Processamento de Arquivos**
-- [ ] Extração de texto de PDFs/HTMLs (OCR quando necessário)
-- [ ] Limpeza de dados (remoção de lixo digital, normalização)
-
-### **Fase 3: Estruturação de Dados**
-- [ ] Classificação por tipo de documento (contratos, portarias, licitações)
-- [ ] Metadados padronizados (órgão, data, assunto, entidades mencionadas)
-
-### **Fase 4: Análise Inteligente**
-- [ ] Modelos de NLP para detecção de padrões suspeitos
-- [ ] Chatbot de consulta (ex: "Quais contratos com valor acima de R$1M em 2023?")
-
-### **Fase 5: Disponibilização Pública**
-- [ ] API aberta para desenvolvedores
-- [ ] Interface web acessível a não técnicos
-
-## 📌 Fontes Implementadas
-
-| Nome | URL | Status |
-|------|-----|--------|
-| Assembleia Legislativa do Estado de Goiás (AL-GO) | [Link](https://transparencia.al.go.leg.br/gestao-parlamentar/diario) | ✅ Implementado |
-| Assembleia Legislativa do Estado de Mato Grosso do Sul (AL-MS) | [Link](https://diariooficial.al.ms.gov.br/) | ✅ Implementado |
-| Assembléia Legislativa do Estado do Pará (AL-PA) | [Link](https://www.alepa.pa.gov.br/Comunicacao/Diarios/) | Pendente |
-| Assembléia Legislativa do Estado do Ceará (AL-CE) | [Link](https://doalece.al.ce.gov.br/publico/ultimas-edicoes/) | ✅ Implementado |
-| Assembléia Legislativa do Estado do Acre (AL-AC) | [Link](https://aleac.tceac.tc.br/faces/paginas/publico/dec/visualizarDOE.xhtml/) | ✅ Implementado |
-
-*(Lista completa de fontes disponível no arquivo [sources.csv](data/sources.csv))*
----
-
 ## ⚙️ Como Executar
 
 1. **Instale as dependências**:
@@ -115,7 +69,7 @@ Você pode acessar os dados por meio do seguinte endpoint (via CloudFront):
 2. **Execute o coletor de arquivos**:
 
    ```bash
-   python run_downloader.py al_go --start 2021-01-1 --end 2025-06-1
+   python run_extractor.py al_go --start 2021-01-1 --end 2025-06-1
    ```
 
 3. **Execute o pipeline de processamento**:
@@ -130,18 +84,6 @@ Você pode acessar os dados por meio do seguinte endpoint (via CloudFront):
 * Extração de padrões temáticos de portarias e contratos
 * Análise de linguagem em atos administrativos
 * Detecção de eventos políticos importantes em diferentes esferas (municipal, estadual, federal)
-
----
-
-## 🌐 Escopo Atual e Futuro
-
-Atualmente, o DataPub contempla **Assembleias Legislativas** e **portais de transparência estaduais**, com expansão prevista para:
-
-* Câmaras Municipais
-* Tribunais de Contas
-* Ministérios Federais
-* Diários da Justiça
-* Contratos, licitações e convênios
 
 ---
 

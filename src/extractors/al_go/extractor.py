@@ -10,7 +10,7 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 import re
 
-class Downloader:
+class Extractor:
     def __init__(self, base_dir="data/raw/algo", headless=True):
         self.base_dir = Path(base_dir)
         self.downloads_dir = self.base_dir / "downloads"
@@ -128,12 +128,12 @@ class Downloader:
 
 
 if __name__ == "__main__":
-    downloader = Downloader(headless=True)
+    extractor = Extractor(headless=True)
 
     start_date = datetime.date(2007, 8, 1)
     end_date = datetime.date(2007, 8, 31)
 
     print(f"🚀 Iniciando download de diários da AL-EGO de {start_date} a {end_date}")
-    downloader.download(start_date, end_date)
+    extractor.download(start_date, end_date)
 
-    downloader.close()
+    extractor.close()

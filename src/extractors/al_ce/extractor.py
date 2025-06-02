@@ -6,7 +6,7 @@ from pathlib import Path
 from datetime import datetime, timedelta
 
 
-class Downloader:
+class Extractor:
     def __init__(self, base_dir="data/raw/alce"):
         self.base_api = "https://doalece.al.ce.gov.br/api/publico/ultimas-edicoes"
         self.base_url = "https://doalece.al.ce.gov.br"
@@ -87,10 +87,10 @@ class Downloader:
 
 
 if __name__ == "__main__":
-    downloader = Downloader()
+    extractor = Extractor()
     try:
         inicio = datetime(2025, 5, 22)
         fim = datetime(2025, 6, 1)
-        downloader.download(inicio, fim)
+        extractor.download(inicio, fim)
     except Exception as e:
         print("Erro durante execução:", e)
