@@ -25,6 +25,22 @@ Nosso objetivo é **tornar mais acessíveis e analisáveis informações que est
 
 ---
 
+## Bucket Público
+
+Os dados deste projeto estão disponíveis em um bucket da AWS com acesso público. Isso permite que qualquer pessoa acesse os arquivos diretamente, sem necessidade de autenticação.
+
+Você pode acessar os dados por meio do seguinte endpoint (via CloudFront):
+
+🔗 [https://d23ollh9dwoi10.cloudfront.net/](https://d23ollh9dwoi10.cloudfront.net/)
+
+> **Nota:** Certifique-se de usar URLs completas e corretas ao referenciar arquivos específicos no bucket. Exemplo:
+>
+> ```
+> https://d23ollh9dwoi10.cloudfront.net/pasta/arquivo.json
+> ```
+
+---
+
 ## 🗂️ Estrutura do Projeto
 
 ```
@@ -81,7 +97,7 @@ Nosso objetivo é **tornar mais acessíveis e analisáveis informações que est
 |------|-----|--------|
 | Assembleia Legislativa do Estado de Goiás (AL-GO) | [Link](https://transparencia.al.go.leg.br/gestao-parlamentar/diario) | ✅ Implementado |
 | Assembleia Legislativa do Estado de Mato Grosso do Sul (AL-MS) | [Link](https://diariooficial.al.ms.gov.br/) | ✅ Implementado |
-| Assembléia Legislativa do Estado do Pará (AL-PA) | [Link](https://www.alepa.pa.gov.br/Comunicacao/Diarios/) | ✅ Implementado |
+| Assembléia Legislativa do Estado do Pará (AL-PA) | [Link](https://www.alepa.pa.gov.br/Comunicacao/Diarios/) | Pendente |
 | Assembléia Legislativa do Estado do Ceará (AL-CE) | [Link](https://doalece.al.ce.gov.br/publico/ultimas-edicoes/) | ✅ Implementado |
 | Assembléia Legislativa do Estado do Acre (AL-AC) | [Link](https://aleac.tceac.tc.br/faces/paginas/publico/dec/visualizarDOE.xhtml/) | ✅ Implementado |
 
@@ -99,7 +115,7 @@ Nosso objetivo é **tornar mais acessíveis e analisáveis informações que est
 2. **Execute o coletor de arquivos**:
 
    ```bash
-   python run_downloader.py al_pa --start 2021-01-1 --end 2025-06-1
+   python run_downloader.py al_go --start 2021-01-1 --end 2025-06-1
    ```
 
 3. **Execute o pipeline de processamento**:
