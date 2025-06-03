@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime, date
 import time
 import hashlib
 import json
@@ -11,7 +11,7 @@ from selenium.webdriver.common.by import By
 import re
 
 class Extractor:
-    def __init__(self, base_dir="data/raw/algo", headless=True):
+    def __init__(self, base_dir="data/raw/algo", headless=False):
         self.base_dir = Path(base_dir)
         self.downloads_dir = self.base_dir / "downloads"
         self.metadata_dir = self.base_dir / "metadata"
@@ -36,9 +36,9 @@ class Extractor:
 
     def download(self, start_date=None, end_date=None, delay=0.5):
         if end_date is None:
-            end_date = datetime.date.today()
+            end_date = date.today()
         if start_date is None:
-            start_date = datetime.date(2007, 1, 1)
+            start_date = date(2007, 1, 1)
 
         current_date = start_date
         while current_date <= end_date:
@@ -51,22 +51,19 @@ class Extractor:
                 self._download_single_url(date_str, url)
                 time.sleep(delay)
 
-            # Avança para o próximo mês
             year = current_date.year + (current_date.month // 12)
             month = current_date.month % 12 + 1
-            current_date = datetime.date(year, month, 1)
+            current_date = date(year, month, 1)
 
     def _get_pdf_links_for_month(self, year, month):
         url = self.page_url_template.format(year, month)
         print(f"  - Carregando página: {url}")
         self.driver.get(url)
 
-        # Dá um tempo para a página carregar os scripts e os eventos
-        time.sleep(3)  # Ajuste se necessário
+        time.sleep(3)
 
         links = {}
 
-        # Busca os <a> com classe específica
         elements = self.driver.find_elements(By.CSS_SELECTOR, "a.fc-day-grid-event")
         for el in elements:
             href = el.get_attribute("href")
@@ -115,7 +112,7 @@ class Extractor:
             "data_publicacao": date_str,
             "url_origem": url,
             "caminho_local": str(filepath),
-            "data_download": datetime.datetime.now().isoformat(),
+            "data_download": datetime.now().isoformat(),
             "tamanho_bytes": os.path.getsize(filepath),
             "hash_md5": file_hash,
             "status": "sucesso",
