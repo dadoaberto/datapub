@@ -55,7 +55,7 @@ def run_extractor(orgao, args):
         print(f"🚀 Iniciando download ALE-MS do número {params['start_num']} até {'último disponível' if not params['end_num'] else params['end_num']}")
 
     elif orgao == "al_pa":
-        params["start_date"] = parse_date(args.start) if args.start else date(2007, 1, 1)
+        params["start_date"] = parse_date(args.start) if args.start else date(2021, 1, 1)
         params["end_date"] = parse_date(args.end) if args.end else date.today()
         print(f"🚀 Iniciando download ALE-PA de {params['start_date']} a {params['end_date']}")
 

@@ -5,6 +5,8 @@ import hashlib
 import random
 from pathlib import Path
 from datetime import datetime, timedelta
+import re
+import dateparser
 
 import requests
 from selenium import webdriver
@@ -15,6 +17,7 @@ from selenium.webdriver.chrome.options import Options
 import pyperclip
 from selenium.webdriver import ActionChains
 from selenium.webdriver.common.keys import Keys
+
 
 
 class Extractor:
@@ -28,7 +31,6 @@ class Extractor:
         self.metadata_dir.mkdir(parents=True, exist_ok=True)
 
         chrome_options = Options()
-     
         
         if self.headless:
             print("🚀 Headless mode enabled")
@@ -54,33 +56,38 @@ class Extractor:
             except Exception as e:
                 print(f"⚠️ Erro ao processar {current_date.strftime('%d/%m/%Y')}: {e}")
             current_date += timedelta(days=1)
-            time.sleep(random.uniform(1, 2))
+            time.sleep(random.uniform(0.5, 1))
 
     def download_single(self, day: datetime):
         print(f"📅 Buscando: {day.strftime('%d/%m/%Y')}")
         self.driver.get(self.base_url)
 
-        sleep_time = random.uniform(1, 2)
+        sleep_time = random.uniform(0.5, 1)
         time.sleep(sleep_time)
 
         try:
+            # Formata a data
             date_str = day.strftime("%d/%m/%Y")
 
-            calendar_button = self.driver.find_element(By.ID, "dateEdit_B-1")
-            calendar_button.click()
-
+            # Aguarda o campo estar presente e o limpa
             input_field = self.wait.until(EC.presence_of_element_located((By.ID, "dateEdit_I")))
             input_field.clear()
 
-            sleep_time = random.uniform(1, 2)
+            # Clica no botão de calendário (se necessário para ativar o campo)
+            calendar_button = self.driver.find_element(By.ID, "dateEdit_B-1")
+            calendar_button.click()
 
+            # Espera curta para garantir que o campo esteja pronto
+            time.sleep(random.uniform(0.5, 1))
+
+            # Insere a data
             input_field.send_keys(date_str)
 
-            action = ActionChains(self.driver)
-            action.send_keys(Keys.TAB).perform()
+            # Pressiona TAB para sair do campo e acionar eventos associados
+            ActionChains(self.driver).send_keys(Keys.TAB).perform()
 
-            sleep_time = random.uniform(1, 2)
-            time.sleep(sleep_time)
+            # Espera final após interação
+            time.sleep(random.uniform(0.5, 1))
 
             # Checa se botão aparece
             button = self.driver.find_elements(By.XPATH, "//button[contains(text(), 'Visualizar o arquivo')]")
@@ -138,6 +145,29 @@ class Extractor:
         with open(self.metadata_dir / f"metadata_{date.isoformat()}.json", "w", encoding="utf-8") as f:
             json.dump(metadata, f, ensure_ascii=False, indent=2)
 
+    def extract_text_from_pdf(pdf_path):
+        full_text = ""
+        with pdfplumber.open(pdf_path) as pdf:
+            # for page in pdf.pages:
+            #     full_text += page.extract_text() + "\n"
+            full_text += pdf.pages[0].extract_text()
+        return full_text
+
+    def _extract_date_range(text):
+        pattern = r'(\d{1,2})\s*to\s*(\d{1,2})\s*de\s*([a-zç]+)\s*de\s*(\d{4})'
+
+        match = re.search(pattern, text.lower())
+        if match:
+            day_start, day_end, month, year = match.groups()
+
+            start_date = dateparser.parse(f"{day_start} de {month} de {year}", languages=['pt'])
+            end_date = dateparser.parse(f"{day_end} de {month} de {year}", languages=['pt'])
+
+            if start_date and end_date:
+                return start_date.strftime('%Y-%m-%d'), end_date.strftime('%Y-%m-%d')
+        
+        return None, None
+
     def close(self):
         self.driver.quit()
 
@@ -146,7 +176,7 @@ if __name__ == "__main__":
     extractor = Extractor()
     try:
         start = datetime(2021, 1, 1)
-        end = datetime(2025, 1, 6)
+        end = datetime.today()
         extractor.download_range(start, end)
     finally:
         extractor.close()

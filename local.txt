@@ -4,3 +4,4 @@ pip install selenium webdriver-manager
 pip install hcaptcha-solver
 pip install pyperclip
 pip install pyautogui
+pip install pdfplumber
