@@ -39,7 +39,6 @@ def run_extractor(orgao, args):
     Extractor = load_extractor(orgao)
 
     extractor = Extractor()
-    print(f"🚀 Iniciando download")
     
     # Configura parâmetros comuns
     params = {}

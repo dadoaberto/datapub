@@ -12,3 +12,4 @@ elasticsearch
 streamlit
 requests
 python-dotenv
+pdfplumber

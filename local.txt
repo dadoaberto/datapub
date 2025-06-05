@@ -5,3 +5,4 @@ pip install hcaptcha-solver
 pip install pyperclip
 pip install pyautogui
 pip install pdfplumber
+pip install dateparser
