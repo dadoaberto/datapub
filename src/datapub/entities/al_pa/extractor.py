@@ -18,11 +18,10 @@ from selenium.webdriver.chrome.options import Options
 import pyperclip
 from selenium.webdriver import ActionChains
 from selenium.webdriver.common.keys import Keys
+from datapub.shared.utils.extractor_base import ExtractorBase
 
-
-
-class Extractor:
-    def __init__(self, base_dir="data/raw/alpa",  headless=True):
+class ALPAExtractor(ExtractorBase):
+    def __init__(self, base_dir="storage/raw/alpa",  headless=True):
         self.headless = headless
         self.base_url = "https://www.alepa.pa.gov.br/Comunicacao/Diarios"
         self.base_dir = Path(base_dir)

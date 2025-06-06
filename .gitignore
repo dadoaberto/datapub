@@ -58,7 +58,9 @@ __pycache__/
 **/__pycache__/
 *.py[cod]
 *.pyo
-data/raw/*/
+storage/raw/*/
+storage/processed/*/
+storage/structured/*/
 
 # Distribution / packaging
 build/

@@ -36,25 +36,30 @@ Você pode acessar os dados por meio do seguinte endpoint (via CloudFront):
 ```
 /datapub
 │
-├── /data
+├── src/                  
+│   └── databub/
+│       ├── __init__.py
+│       ├── /entities
+│       │   ├── /al_go
+│       │   │   ├── extractor.py
+│       │   │   ├── processing.py
+│       │   │   ├── models.py
+│       │   │   └── config.yaml
+│       │   ├── /al_ms
+│       │   │   └── ...
+│       ├── /shared
+│       │   ├── /utils  
+│       │   ├── /processing
+│       │   ├── /models
+│       │   └── /config
+│       ├── config.py
+│       ├── cli.py
+│       └── factory.py
+│
+├── /storage
 │   ├── /raw               # Documentos públicos originais (PDF, HTML, etc.)
 │   ├── /processed         # Textos extraídos, limpos e enriquecidos
 │   └── /structured        # Dados estruturados (JSON, CSV, banco de dados)
-│
-├── src/                   # Código fonte dentro de 'src' (modo recomendado)
-│   └── databub/           # Package com seu código
-│       ├── __init__.py
-│       ├── extractors/    # Robôs de coleta (scrapers, crawlers, APIs)
-│       │   ├── __init__.py
-│       │   ├── al_pa/       
-│       │   │    ├── base.py
-│       │   │    ├── diario_alpa.py
-│       │   │    └── relatorios_gestao_alpa.py
-│       │   ├── utils/
-│       │   ├── __init__.py
-│       │   └── selenium_utils.py
-│       ├── config.py
-│       └── factory.py
 │
 ├── tests/                 
 │   ├── __init__.py
@@ -80,13 +85,13 @@ Você pode acessar os dados por meio do seguinte endpoint (via CloudFront):
 1. **Instale as dependências**:
 
    ```bash
-   pip install -r requirements.txt
+   pip install -e . 
    ```
 
 2. **Execute o coletor de arquivos**:
 
    ```bash
-   python run_extractor.py al_go --start 2021-01-1 --end 2025-06-1
+   extractor al_pa --start 2021-01-1 --end 2025-06-1
    ```
 
 3. **Execute o pipeline de processamento**:

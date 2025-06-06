@@ -8,7 +8,7 @@ from pathlib import Path
 
 
 class Extractor:
-    def __init__(self, base_dir="data/raw/alac"):
+    def __init__(self, base_dir="storage/raw/alac"):
         self.session = requests.Session()
         # Em transição para: https://www.al.ac.leg.br/
         self.base_url = "https://aleac.tceac.tc.br/faces/paginas/publico/dec/visualizarDOE.xhtml"

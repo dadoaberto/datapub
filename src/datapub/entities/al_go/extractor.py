@@ -9,9 +9,11 @@ from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 import re
+from datapub.shared.utils.extractor_base import ExtractorBase
 
-class Extractor:
-    def __init__(self, base_dir="data/raw/algo", headless=False):
+class ALGOExtractor(ExtractorBase):
+    def __init__(self):
+        super().__init__(entity="ALGO", base_dir="storage/raw/al_go")
         self.base_dir = Path(base_dir)
         self.downloads_dir = self.base_dir / "downloads"
         self.metadata_dir = self.base_dir / "metadata"
@@ -19,13 +21,11 @@ class Extractor:
         self.downloads_dir.mkdir(parents=True, exist_ok=True)
         self.metadata_dir.mkdir(parents=True, exist_ok=True)
 
-        # URL base para a página, ano e mês formatados
         self.page_url_template = "https://transparencia.al.go.leg.br/gestao-parlamentar/diario?ano={}&mes={}"
 
-        # Configura Selenium Chrome WebDriver
         chrome_options = Options()
         if headless:
-            chrome_options.add_argument("--headless=new")  # headless modo
+            chrome_options.add_argument("--headless=new") 
             chrome_options.add_argument("--disable-gpu")
             chrome_options.add_argument("--no-sandbox")
         

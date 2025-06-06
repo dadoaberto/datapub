@@ -14,7 +14,7 @@ from pathlib import Path
 from datetime import datetime, timedelta
 
 class Extractor:
-    def __init__(self, base_dir="data/raw/alms", headless=True):
+    def __init__(self, base_dir="storage/raw/alms", headless=True):
         self.base_dir = Path(base_dir)
         self.downloads_dir = (self.base_dir / "downloads").resolve()
         self.metadata_dir = self.base_dir / "metadata"

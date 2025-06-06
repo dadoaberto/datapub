@@ -7,7 +7,7 @@ from datetime import datetime, timedelta
 
 
 class Extractor:
-    def __init__(self, base_dir="data/raw/alce"):
+    def __init__(self, base_dir="storage/raw/alce"):
         self.base_api = "https://doalece.al.ce.gov.br/api/publico/ultimas-edicoes"
         self.base_url = "https://doalece.al.ce.gov.br"
         self.base_dir = Path(base_dir)
