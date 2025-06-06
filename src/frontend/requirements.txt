@@ -1,4 +1,0 @@
-streamlit>=1.10.0
-requests
-python-dotenv
-pdfplumber
