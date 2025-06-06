@@ -9,9 +9,9 @@ Nosso objetivo é **tornar mais acessíveis e analisáveis informações que est
 > 🧭 **Por que isso importa?**
 > Documentos públicos revelam o funcionamento real do Estado. Ao reunir e estruturar essas fontes:
 >
-> * Permitimos o **monitoramento da saúde política e institucional do país**
-> * Fortalecemos o **controle social e o jornalismo investigativo**
-> * Geramos dados úteis para **pesquisadores, ONGs, órgãos de controle e a sociedade civil organizada**
+> - Permitimos o **monitoramento da saúde política e institucional do país**
+> - Fortalecemos o **controle social e o jornalismo investigativo**
+> - Geramos dados úteis para **pesquisadores, ONGs, órgãos de controle e a sociedade civil organizada**
 
 ---
 
@@ -37,23 +37,40 @@ Você pode acessar os dados por meio do seguinte endpoint (via CloudFront):
 /datapub
 │
 ├── /data
-│   ├── /raw              # Documentos públicos originais (PDF, HTML, etc.)
-│   ├── /processed        # Textos extraídos, limpos e enriquecidos
-│   └── /structured       # Dados estruturados (JSON, CSV, banco de dados)
+│   ├── /raw               # Documentos públicos originais (PDF, HTML, etc.)
+│   ├── /processed         # Textos extraídos, limpos e enriquecidos
+│   └── /structured        # Dados estruturados (JSON, CSV, banco de dados)
 │
-├── /src
-│   ├── /extractors      # Robôs de coleta (scrapers, crawlers, APIs)
-│       ├── al_go.py      # Assembleia Legislativa de GO
-│       ├── al_ms.py      # Assembleia Legislativa de MS
-│       └── ...
-│   ├── /processing       # Pipelines ETL (extração, transformação, carga)
-│   ├── /models           # Modelos de NLP/ML para análise de conteúdo
-│   ├── /api              # Backend (FastAPI)
-│   └── /frontend         # Interface interativa (Streamlit)
+├── src/                   # Código fonte dentro de 'src' (modo recomendado)
+│   └── databub/           # Package com seu código
+│       ├── __init__.py
+│       ├── extractors/    # Robôs de coleta (scrapers, crawlers, APIs)
+│       │   ├── __init__.py
+│       │   ├── al_pa/       
+│       │   │    ├── base.py
+│       │   │    ├── diario_alpa.py
+│       │   │    └── relatorios_gestao_alpa.py
+│       │   ├── utils/
+│       │   ├── __init__.py
+│       │   └── selenium_utils.py
+│       ├── config.py
+│       └── factory.py
 │
-├── docker-compose.yml    # Orquestração de serviços via Docker
-├── requirements.txt      # Dependências do Python
-└── README.md             # Este documento
+├── tests/                 
+│   ├── __init__.py
+│   ├── test_diario_alpa.py
+│   └── test_relatorios_gestao_alpa.py
+│
+├── docs/
+│
+├── .gitignore
+├── LICENSE
+├── pyproject.toml           # Configurações do projeto (PEP 518)
+├── setup.cfg                # Configurações do setuptools, lint, pytest, etc
+├── setup.py                 # Script de instalação
+├── requirements.txt         # Dependências
+└── README.rst               # Documentação
+
 ```
 
 ---
@@ -80,10 +97,10 @@ Você pode acessar os dados por meio do seguinte endpoint (via CloudFront):
 
 ## 🔍 Casos de Uso
 
-* Monitoramento de nomeações, exonerações e licitações
-* Extração de padrões temáticos de portarias e contratos
-* Análise de linguagem em atos administrativos
-* Detecção de eventos políticos importantes em diferentes esferas (municipal, estadual, federal)
+- Monitoramento de nomeações, exonerações e licitações
+- Extração de padrões temáticos de portarias e contratos
+- Análise de linguagem em atos administrativos
+- Detecção de eventos políticos importantes em diferentes esferas (municipal, estadual, federal)
 
 ---
 
@@ -99,4 +116,3 @@ Abra uma **issue**, envie um **pull request** ou compartilhe fontes/documentos d
 Este projeto é de código aberto sob a [MIT License](LICENSE).
 
 ---
-
