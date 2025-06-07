@@ -44,18 +44,20 @@ class ALPAExtractor(ExtractorBase):
         parser.add_argument("--end", help="Data final no formato YYYY-MM-DD")
 
     def download(self, start=None, end=None):
-        print(f"📡 Buscando edições de {start} até {end}")
-        
-        if end is None:
-            end = date.today()
-        else:
-            start = dateparser.parse(start).date()
         if start is None:
             start = date(2021, 1, 1)
         else:
+            start = dateparser.parse(start).date()
+
+        if end is None:
+            end = date.today()
+        else:
             end = dateparser.parse(end).date()
+
+        print(f"📡 Buscando edições de {start} até {end}")
             
         current_date = start
+        
         while current_date <= end:
             try:
                 self._download_single(current_date)

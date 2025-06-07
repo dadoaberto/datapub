@@ -8,6 +8,7 @@ from datapub.entities.al_pa.extractors.diario_extractor import ALPAExtractor
 from datapub.entities.al_go.extractors.diario_extractor import ALGOExtractor
 from datapub.entities.al_ms.extractors.diario_extractor import ALMSExtractor
 from datapub.entities.al_ce.extractors.diario_extractor import ALCEExtractor
+from datapub.entities.al_ac.extractors.diario_extractor import ALACExtractor
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Run extractors")
@@ -18,7 +19,7 @@ def build_parser() -> argparse.ArgumentParser:
         "al_go": [{"diario": ALGOExtractor}],
         "al_ms": [{"diario": ALMSExtractor}],
         "al_ce": [{"diario": ALCEExtractor}],
-        # "al_ac": [{"diario": ALACExtractor}],
+        "al_ac": [{"diario": ALACExtractor}],
     }
 
     for entity, extractor_type_list in extractors.items():

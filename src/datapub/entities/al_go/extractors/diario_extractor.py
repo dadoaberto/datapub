@@ -39,18 +39,20 @@ class ALGOExtractor(ExtractorBase):
         parser.add_argument("--end", help="Data final no formato YYYY-MM-DD")
 
     def download(self, start=None, end=None):
-        print(f"📡 Buscando edições de {start} até {end}")
+        if start is None:
+            start = date(2007, 8, 1)
+        else:
+            start = dateparser.parse(start).date()
 
         if end is None:
             end = date.today()
         else:
-            start = dateparser.parse(start).date()
-        if start is None:
-            start = date(2007, 8, 1)
-        else:
             end = dateparser.parse(end).date()
 
+        print(f"📡 Buscando edições de {start} até {end}")
+
         current_date = start
+        
         while current_date <= end:
             year = current_date.year
             month = current_date.month
@@ -58,7 +60,7 @@ class ALGOExtractor(ExtractorBase):
             links = self._get_pdf_links_for_month(year, month)
 
             for date_str, url in links.items():
-                self._download_single_url(date_str, url)
+                self._download_single_url(current_date, url)
                 time.sleep(1)
 
             year = current_date.year + (current_date.month // 12)
@@ -87,15 +89,16 @@ class ALGOExtractor(ExtractorBase):
         print(f"  - Encontrados {len(links)} links")
         return links
 
-    def _download_single_url(self, date_str, url):
+    def _download_single_url(self, date_target: date, url):
         match = re.search(r"diario-alego-(\d{4}-\d{2}-\d{2})\.pdf", url)
         date = match.group(1)
+        date_str = date_target.strftime("%Y-%m-%d")
 
-        filename = f"diario-alego-{date}.pdf"
+        filename = f"diario-alego-{date_str}.pdf"
         filepath = self.downloads_dir / filename
 
         if filepath.exists():
-            print(f"⏭️ [{date}] Já existe, pulando.")
+            print(f"⏭️ [{date_str}] Já existe, pulando.")
             return True
 
         try:

@@ -70,6 +70,7 @@ class ALMSExtractor(ExtractorBase):
             end = dateparser.parse(end).date()
 
         print(f"📡 Buscando edições de {start} até {end}")
+        
         current_date = start
 
         try:
