@@ -1,14 +1,16 @@
-from datetime import datetime, date
+import os
+import re
+import json
 import time
 import hashlib
-import json
-import os
 from pathlib import Path
+from datetime import datetime, date
+
 import requests
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
-import re
+
 from datapub.shared.utils.extractor_base import ExtractorBase
 
 class ALGOExtractor(ExtractorBase):
@@ -28,11 +30,11 @@ class ALGOExtractor(ExtractorBase):
     def close(self):
         self.driver.quit()
 
-    def download(self, start_date=None, end_date=None, delay=0.5):
+    def download(self, start_date=None, end_date=None):
         if end_date is None:
             end_date = date.today()
         if start_date is None:
-            start_date = date(2007, 1, 1)
+            start_date = date(2007, 8, 1)
 
         current_date = start_date
         while current_date <= end_date:
@@ -43,7 +45,7 @@ class ALGOExtractor(ExtractorBase):
 
             for date_str, url in links.items():
                 self._download_single_url(date_str, url)
-                time.sleep(delay)
+                time.sleep(1)
 
             year = current_date.year + (current_date.month // 12)
             month = current_date.month % 12 + 1
@@ -102,7 +104,7 @@ class ALGOExtractor(ExtractorBase):
             return False
 
 if __name__ == "__main__":
-    extractor = ALGOExtractor(headless=True)
+    extractor = ALGOExtractor()
 
     start_date = datetime.date(2007, 8, 1)
     end_date = datetime.now().date()
