@@ -92,6 +92,11 @@ class ALMSExtractor(ExtractorBase):
 
     def _download_single(self, date_obj: date):
         date_str = date_obj.strftime("%Y-%m-%d")
+        existing_file = self.downloads_dir / f"diario-al_ms-{date_str}.pdf"
+        
+        if existing_file.exists():
+            print(f"📦 Já existe: {existing_file.name}, pulando download.")
+            return True
         for attempt in range(1, self.max_attempts + 1):
             try:
                 print(f"🔍 Tentando Diário nº {date_str} (tentativa {attempt})")
@@ -132,7 +137,6 @@ class ALMSExtractor(ExtractorBase):
         return False
 
     def _download_pdf(self, date_str, pdf_url, initial_files: set):
-        print(f"📥 Baixando PDF diretamente: {pdf_url}")
         response = requests.get(pdf_url)
         if response.status_code != 200 or not response.content.startswith(b"%PDF"):
             print(f"❌ Falha ao baixar ou arquivo inválido: {date_str}")
