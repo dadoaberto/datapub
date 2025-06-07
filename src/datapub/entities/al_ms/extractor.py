@@ -13,35 +13,20 @@ from datetime import datetime
 from pathlib import Path
 from datetime import datetime, timedelta
 
-class Extractor:
-    def __init__(self, base_dir="storage/raw/alms", headless=True):
-        self.base_dir = Path(base_dir)
-        self.downloads_dir = (self.base_dir / "downloads").resolve()
-        self.metadata_dir = self.base_dir / "metadata"
-        self.logs_dir = self.base_dir / "logs"
+class ALMSExtractor:
+    def __init__(self, base_dir="storage/raw/al_ms", headless=True):
+        super().__init__(entity="ALMS", base_dir=base_dir)
         
-        self.headless = headless
-        
-        # Cria os diretórios se não existirem
-        # self.downloads_dir.mkdir(parents=True, exist_ok=True)
-        os.makedirs(self.downloads_dir, exist_ok=True)
-        self.metadata_dir.mkdir(parents=True, exist_ok=True)
-        self.logs_dir.mkdir(parents=True, exist_ok=True)
-        
-        # Configurações do navegador
         self._setup_driver()
         
-        # Configurações da busca
-        self.start_number = 1  # Número inicial do diário
-        self.max_attempts = 2  # Tentativas por diário
-        self.delay_between = 1  # Delay entre requisições
-        self.max_consecutive_failures = 5  # Limite de falhas consecutivas
+        self.start_number = 1  
+        self.max_attempts = 2
+        self.delay_between = 2  
+        self.max_consecutive_failures = 2 
     
     def _setup_driver(self):
-        """Configura o WebDriver do Chrome"""
         chrome_options = webdriver.ChromeOptions()
         
-        # Configurações de download
         chrome_options.add_experimental_option("prefs", {
             "download.default_directory": str(self.downloads_dir),
             "download.prompt_for_download": False,
@@ -50,24 +35,20 @@ class Extractor:
         })
         
         if self.headless:
-            chrome_options.add_argument("--headless=new")  # headless modo
+            chrome_options.add_argument("--headless=new")
             chrome_options.add_argument("--disable-gpu")
             chrome_options.add_argument("--no-sandbox")
         
-        # Configura o serviço do Chrome
         service = Service(ChromeDriverManager().install())
         
-        # Inicia o navegador
         self.driver = webdriver.Chrome(service=service, options=chrome_options)
         self.wait = WebDriverWait(self.driver, 15)
 
     def download(self, start_num=None, end_num=None):
-        """Baixa diários em um intervalo numérico"""
         self.download_range(start_num, end_num)
         print("✅ Download concluido")
     
     def download_range(self, start_num=None, end_num=None):
-        """Baixa diários em um intervalo numérico"""
         current_num = start_num or self.start_number
         end_num = end_num or float('inf')
         consecutive_failures = 0
@@ -93,10 +74,9 @@ class Extractor:
                 time.sleep(self.delay_between)
         
         finally:
-            self._cleanup()
+            self.close()
     
     def _process_diario(self, num_str):
-        """Processa um diário específico"""
         for attempt in range(self.max_attempts):
             try:
                 print(f"🔍 Tentando Diário nº {num_str} (tentativa {attempt + 1})")
@@ -154,7 +134,6 @@ class Extractor:
         return False
     
     def _download_pdf(self, num_str, pdf_url):
-        """Baixa e processa um PDF individual com tratamento robusto de erros"""
         try:
             print(f"⏳ Iniciando download do Diário {num_str}...")
 
@@ -292,13 +271,11 @@ class Extractor:
         with open(error_path, 'a', encoding='utf-8') as f:
             f.write(json.dumps(error_log, ensure_ascii=False) + "\n")
     
-    def _cleanup(self):
-        """Finaliza o navegador"""
-        if hasattr(self, 'driver'):
-            self.driver.quit()
+    def close(self):
+       self.driver.quit()
+            
 
     def get_recent_complete_pdfs(downloads_dir: Path, since: float = 60.0) -> set[Path]:
-        """Retorna arquivos PDF completos, excluindo temporários e antigos."""
         now = datetime.now()
         pdfs = set()
 
@@ -312,7 +289,7 @@ class Extractor:
                 if (now - mtime).total_seconds() <= since:
                     pdfs.add(file)
             except Exception:
-                continue  # em caso de falha ao acessar stats
+                continue
 
         return pdfs
 
