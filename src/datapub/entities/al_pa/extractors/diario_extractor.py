@@ -1,13 +1,11 @@
 import time
-import os
-import json
 import hashlib
 import random
-from pathlib import Path
 from datetime import datetime, timedelta, date
 import re
 import dateparser
 import pdfplumber
+import argparse
 
 import requests
 from selenium import webdriver
@@ -15,14 +13,14 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.chrome.options import Options
-import pyperclip
 from selenium.webdriver import ActionChains
 from selenium.webdriver.common.keys import Keys
+
 from datapub.shared.utils.extractor_base import ExtractorBase
 
 class ALPAExtractor(ExtractorBase):
-    def __init__(self, base_dir="storage/raw/alpa", headless=True):
-        super().__init__(entity="ALPA", base_dir=base_dir)
+    def __init__(self, base_dir="storage/raw/al_pa", extractor_type="diario"):
+        super().__init__(entity="ALPA", base_dir=base_dir, extractor_type=extractor_type)
 
         self.base_url = "https://www.alepa.pa.gov.br/Comunicacao/Diarios"   
 
@@ -30,7 +28,7 @@ class ALPAExtractor(ExtractorBase):
         
         if self.headless:
             print("🚀 Headless mode enabled")
-            chrome_options.add_argument("--headless=new")  # headless modo
+            chrome_options.add_argument("--headless=new")
             chrome_options.add_argument("--disable-gpu")
             chrome_options.add_argument("--no-sandbox")
         else:
@@ -40,119 +38,134 @@ class ALPAExtractor(ExtractorBase):
         self.driver = webdriver.Chrome(options=chrome_options)
         self.wait = WebDriverWait(self.driver, 20)
 
-    def download(self, start_date, end_date):
-        self.download_range(start_date, end_date)
-        print("✅ Download concluído")
+    @staticmethod
+    def add_arguments(parser: argparse.ArgumentParser):
+        parser.add_argument("--start", help="Data inicial no formato YYYY-MM-DD")
+        parser.add_argument("--end", help="Data final no formato YYYY-MM-DD")
 
-    def download_range(self, start_date, end_date):
-        current_date = start_date
-        while current_date <= end_date:
+    def download(self, start=None, end=None):
+        if start is None:
+            start = date(2021, 1, 1)
+        else:
+            start = dateparser.parse(start).date()
+
+        if end is None:
+            end = date.today()
+        else:
+            end = dateparser.parse(end).date()
+
+        print(f"📡 Buscando edições de {start} até {end}")
+            
+        current_date = start
+        
+        while current_date <= end:
             try:
                 self._download_single(current_date)
+                time.sleep(random.uniform(0, 0.2))
             except Exception as e:
                 print(f"⚠️ Erro ao processar {current_date.strftime('%d/%m/%Y')}: {e}")
             current_date += timedelta(days=1)
-            time.sleep(random.uniform(0, 0.2))
 
-    def _download_single(self, day: datetime):
-        day_str = day.isoformat() 
-
-        for f in self.downloads_dir.iterdir():
-            name = f.name
-
-            if name == f"diario-alpa-{day_str}.pdf":
-                print(f"⏭️ Já existe (exato): {name}")
-                return
-
-            match = re.match(r"diario-alpa-(\d{4}-\d{2}-\d{2})_(\d{4}-\d{2}-\d{2})\.pdf", name)
-            if match:
-                start_str, end_str = match.groups()
-                try:
-                    start_date = datetime.fromisoformat(start_str).date()
-                    end_date = datetime.fromisoformat(end_str).date()
-                    if start_date <= day <= end_date:
-                        print(f"⏭️ Já existe (intervalo): {name}")
-                        return
-                except ValueError                   :
-                    continue 
-
-        print(f"📅 Buscando: {day.strftime('%d/%m/%Y')}")
-        self.driver.get(self.base_url)
-
-        sleep_time = random.uniform(0.1, 0.3)
-        time.sleep(sleep_time)
+    def _download_pdf(self, date_str, pdf_url):
+        print(f"⏳ Iniciando download do Diário {date_str}...")
 
         try:
-            date_str = day.strftime("%d/%m/%Y")
+            self.driver.execute_script("window.open(arguments[0], '_blank');", pdf_url)
+            start_time = time.time()
+            max_wait = 30
+            initial_files = set(self.downloads_dir.glob("*.pdf"))
 
-            input_field = self.wait.until(EC.presence_of_element_located((By.ID, "dateEdit_I")))
-            input_field.clear()
+            print(f"⏳ Aguardando download do Diário {date_str}...")
 
-            calendar_button = self.driver.find_element(By.ID, "dateEdit_B-1")
-            calendar_button.click()
+            latest_file = None
+            while time.time() - start_time < max_wait:
+                current_files = {
+                    f for f in self.downloads_dir.glob("*.pdf")
+                    if not f.name.endswith(".crdownload")
+                }
+                new_files = current_files - initial_files
+                if new_files:
+                    latest_file = max(new_files, key=lambda f: f.stat().st_mtime)
+                    size = latest_file.stat().st_size
+                    time.sleep(2)
+                    if latest_file.stat().st_size == size:
+                        break
+                time.sleep(1)
+            else:
+                print(f"❌ Timeout ao baixar Diário {date_str}")
+                return False
 
-            time.sleep(random.uniform(0.1, 0.3))
+            print(f"📄 Verificando validade do PDF para Diário {date_str}...")
+            with latest_file.open("rb") as f:
+                if not f.read(4).startswith(b"%PDF"):
+                    print(f"❌ Arquivo inválido para Diário {date_str}")
+                    latest_file.unlink(missing_ok=True)
+                    return False
 
-            input_field.send_keys(date_str)
+            new_filename = f"diario-al_ms-{date_str}.pdf"
+            new_path = self.downloads_dir / new_filename
 
-            ActionChains(self.driver).send_keys(Keys.TAB).perform()
+            try:
+                print(f"📦 Renomeando arquivo para {new_filename}")
+                latest_file.rename(new_path)
+            except Exception as e:
+                print(f"❌ Erro ao renomear arquivo: {str(e)}")
+                self._log_error(date_str, f"Erro ao renomear: {str(e)}")
+                return False
 
-            time.sleep(random.uniform(0.1, 0.3))
+            file_size = new_path.stat().st_size
+            if file_size == 0:
+                print(f"❌ Arquivo vazio para Diário {date_str}")
+                new_path.unlink(missing_ok=True)
+                return False
 
-            button = self.driver.find_elements(By.XPATH, "//button[contains(text(), 'Visualizar o arquivo')]")
-            if not button:
-                print(f"⚠️ Nenhum diário para {day.strftime('%d/%m/%Y')}")
-                return
+            print(f"💾 Salvando metadados para Diário {date_str}")
+            self._save_metadata(
+                new_filename,
+                pdf_url,
+                new_path,
+                "pdf",
+                self._calculate_hash(new_path),
+            )
 
-            button[0].click()
-            time.sleep(4)
-
-            if len(self.driver.window_handles) < 2:
-                print(f"❌ PDF não abriu em nova aba para {day.strftime('%d/%m/%Y')}")
-                return
-
-            self.driver.switch_to.window(self.driver.window_handles[-1])
-            pdf_url = self.driver.current_url
-            self.driver.close()
-            self.driver.switch_to.window(self.driver.window_handles[0])
-
-            self._download_pdf(pdf_url, day)
+            print(f"✅ Diário {date_str} baixado com sucesso ({file_size / 1024:.2f} KB)")
+            return True
 
         except Exception as e:
-            print(f"❌ Erro em {day.strftime('%d/%m/%Y')}: {e}")
+            print(f"❌ Erro inesperado ao baixar Diário {date_str}: {str(e)}")
+            self._log_error(date_str, str(e))
+            return False
 
     def _download_pdf(self, url, day):
         try:
             response = requests.get(url, timeout=15)
             if response.status_code == 200 and b"%PDF" in response.content[:10]:
-                temp_filename = f"diario-alpa-{day.isoformat()}.pdf"
+                temp_filename = f"diario-al_pa-{day.isoformat()}.pdf"
                 temp_path = self.downloads_dir / temp_filename
 
                 with open(temp_path, "wb") as f:
                     f.write(response.content)
 
-                path = temp_path  # Caminho final, pode ser alterado se houver range
+                path = temp_path 
                 text = self._extract_text_from_pdf(temp_path)
 
                 if text:
                     date_range = self._extract_date_range(text)
                     if date_range[0] and date_range[1]:
                         print(f"📋 Encontrado intervalo de datas: {date_range}")
-                        # Renomeia com intervalo de datas
-                        final_filename = f"diario-alpa-{date_range[0]}_{date_range[1]}.pdf"
+                        final_filename = f"diario-al_pa-{date_range[0]}_{date_range[1]}.pdf"
                         final_path = self.downloads_dir / final_filename
                         temp_path.rename(final_path)
-                        path = final_path  # Atualiza o caminho final
+                        path = final_path  
 
                 file_hash = hashlib.md5(response.content).hexdigest()
-                self._save_metadata(url, path, day, file_hash)
+                self._save_metadata(temp_filename, url, path, 'pdf' ,file_hash)
                 print(f"✅ Salvo: {path.name} | Hash: {file_hash[:8]}")
 
             else:
                 print(f"⚠️ Conteúdo não é PDF válido: {url}")
         except Exception as e:
             print(f"❌ Falha ao baixar PDF: {e}")
-
 
     def _extract_text_from_pdf(self, pdf_path):
         full_text = ""
@@ -196,30 +209,17 @@ class ALPAExtractor(ExtractorBase):
 
         return results[0]
 
-    def _save_metadata(self, url, path, date, file_hash):
-        metadata = {
-            "orgao": "ALEPA",
-            "data_publicacao": date.isoformat(),
-            "url_origem": url,
-            "caminho_local": str(path),
-            "data_download": datetime.now().isoformat(),
-            "tamanho_bytes": os.path.getsize(path),
-            "hash_md5": file_hash,
-            "status": "sucesso"
-        }
-        
-        with open(self.metadata_dir / f"metadata_{date.isoformat()}.json", "w", encoding="utf-8") as f:
-            json.dump(metadata, f, ensure_ascii=False, indent=2)
-
     def close(self):
         self.driver.quit()
 
-
 if __name__ == "__main__":
-    extractor = Extractor()
-    try:
-        start = datetime(2021, 1, 1)
-        end = datetime.today()
-        extractor.download_range(start, end)
-    finally:
-        extractor.close()
+    extractor = ALPAExtractor()
+    
+    start_date = datetime.date(2021, 1, 1)
+    end_date = datetime.now().date()
+
+    print(f"🚀 Iniciando download de diários oficiais da AL-PA de {start_date} a {end_date}")
+
+    extractor.download(start_date, end_date)
+
+    extractor.close()
