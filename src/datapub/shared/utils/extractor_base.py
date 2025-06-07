@@ -39,10 +39,8 @@ class ExtractorBase(ExtractorContract):
         with open(self.metadata_dir / name_metadata, "w", encoding="utf-8") as f:
             json.dump(metadata, f, ensure_ascii=False, indent=2)
 
-    def _generate_file_hash(self, content: bytes) -> str:
-        return hashlib.md5(content).hexdigest()
-
-    def add_arguments(self, parser):
+    @staticmethod
+    def add_arguments(parser):
         raise NotImplementedError("You must implement `add_arguments` method in the child class.")
 
     def download(self, *args, **kwargs):

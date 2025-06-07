@@ -1,8 +1,3 @@
 python -m venv venv
 source venv/bin/activate
-pip install selenium webdriver-manager
-pip install hcaptcha-solver
-pip install pyperclip
-pip install pyautogui
-pip install pdfplumber
-pip install dateparser
+pip install -r requirements.txt

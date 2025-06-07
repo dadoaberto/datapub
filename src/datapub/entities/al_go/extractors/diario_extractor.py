@@ -108,15 +108,15 @@ class ALGOExtractor(ExtractorBase):
                 date = datetime.strptime(date, "%Y-%m-%d")
                 self._save_metadata(filename, url, filepath, "pdf", file_hash)
 
-                print(f"✅ [{date_str}] Baixado com sucesso | Hash: {file_hash[:8]}")
+                print(f"✅ [{date}] Baixado com sucesso | Hash: {file_hash[:8]}")
                 return True
             else:
                 print(
-                    f"⚠️ [{date_str}] Documento não encontrado ou inválido (HTTP {response.status_code})"
+                    f"⚠️ [{date}] Documento não encontrado ou inválido (HTTP {response.status_code})"
                 )
                 return False
         except Exception as e:
-            print(f"❌ [{date_str}] Erro ao baixar: {e}")
+            print(f"❌ [{date}] Erro ao baixar: {e}")
             return False
 
 
