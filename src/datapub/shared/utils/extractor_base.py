@@ -14,12 +14,6 @@ class ExtractorBase(ExtractorContract):
         self.base_dir = Path(base_dir)
         self.downloads_dir = self.base_dir / "downloads"
         self.metadata_dir = self.base_dir / "metadata"
-        s3 = s3fs.S3FileSystem(
-            key='SUA_ACCESS_KEY',
-            secret='SUA_SECRET_KEY',
-            endpoint_url='https://seu-endpoint-s3'  # Opcional para outros providers além da AWS
-        )
-        self.fs = fs  
         self.downloads_dir.mkdir(parents=True, exist_ok=True)
         self.metadata_dir.mkdir(parents=True, exist_ok=True)
 
