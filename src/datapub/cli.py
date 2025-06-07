@@ -57,7 +57,7 @@ def run_extractor(entity, args):
 
     if entity == "al_go":
         # ALE-GO extractor: uses start/end dates
-        params["start_date"] = parse_date(args.start) if args.start else date(2007, 8, 2)
+        params["start_date"] = parse_date(args.start) if args.start else date(2007, 8, 1)
         params["end_date"] = parse_date(args.end) if args.end else date.today()
         print(f"🚀 Starting ALE-GO download from {params['start_date']} to {params['end_date']}")
     

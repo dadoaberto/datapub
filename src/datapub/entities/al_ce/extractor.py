@@ -11,10 +11,10 @@ class Extractor:
         self.base_api = "https://doalece.al.ce.gov.br/api/publico/ultimas-edicoes"
         self.base_url = "https://doalece.al.ce.gov.br"
         self.base_dir = Path(base_dir)
-        self.download_dir = self.base_dir / "downloads"
+        self.downloads_dir = self.base_dir / "downloads"
         self.metadata_dir = self.base_dir / "metadata"
 
-        self.download_dir.mkdir(parents=True, exist_ok=True)
+        self.downloads_dir.mkdir(parents=True, exist_ok=True)
         self.metadata_dir.mkdir(parents=True, exist_ok=True)
 
     def _format_date(self, date: datetime):
@@ -59,7 +59,7 @@ class Extractor:
 
         response = requests.get(url_pdf, timeout=15)
         if response.status_code == 200 and b"%PDF" in response.content[:10]:
-            local_path = self.download_dir / nome_arquivo
+            local_path = self.downloads_dir / nome_arquivo
             with open(local_path, "wb") as f:
                 f.write(response.content)
 

@@ -21,14 +21,10 @@ from selenium.webdriver.common.keys import Keys
 from datapub.shared.utils.extractor_base import ExtractorBase
 
 class ALPAExtractor(ExtractorBase):
-    def __init__(self, base_dir="storage/raw/alpa",  headless=True):
-        self.headless = headless
-        self.base_url = "https://www.alepa.pa.gov.br/Comunicacao/Diarios"
-        self.base_dir = Path(base_dir)
-        self.download_dir = self.base_dir / "downloads"
-        self.metadata_dir = self.base_dir / "metadata"
-        self.download_dir.mkdir(parents=True, exist_ok=True)
-        self.metadata_dir.mkdir(parents=True, exist_ok=True)
+    def __init__(self, base_dir="storage/raw/alpa", headless=True):
+        super().__init__(entity="ALPA", base_dir=base_dir)
+
+        self.base_url = "https://www.alepa.pa.gov.br/Comunicacao/Diarios"   
 
         chrome_options = Options()
         
@@ -61,7 +57,7 @@ class ALPAExtractor(ExtractorBase):
     def _download_single(self, day: datetime):
         day_str = day.isoformat() 
 
-        for f in self.download_dir.iterdir():
+        for f in self.downloads_dir.iterdir():
             name = f.name
 
             if name == f"diario-alpa-{day_str}.pdf":
@@ -130,7 +126,7 @@ class ALPAExtractor(ExtractorBase):
             response = requests.get(url, timeout=15)
             if response.status_code == 200 and b"%PDF" in response.content[:10]:
                 temp_filename = f"diario-alpa-{day.isoformat()}.pdf"
-                temp_path = self.download_dir / temp_filename
+                temp_path = self.downloads_dir / temp_filename
 
                 with open(temp_path, "wb") as f:
                     f.write(response.content)
@@ -144,7 +140,7 @@ class ALPAExtractor(ExtractorBase):
                         print(f"📋 Encontrado intervalo de datas: {date_range}")
                         # Renomeia com intervalo de datas
                         final_filename = f"diario-alpa-{date_range[0]}_{date_range[1]}.pdf"
-                        final_path = self.download_dir / final_filename
+                        final_path = self.downloads_dir / final_filename
                         temp_path.rename(final_path)
                         path = final_path  # Atualiza o caminho final
 

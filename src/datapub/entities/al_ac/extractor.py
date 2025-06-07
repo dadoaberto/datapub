@@ -13,10 +13,10 @@ class Extractor:
         # Em transição para: https://www.al.ac.leg.br/
         self.base_url = "https://aleac.tceac.tc.br/faces/paginas/publico/dec/visualizarDOE.xhtml"
         self.base_dir = Path(base_dir)
-        self.download_dir = self.base_dir / "downloads"
+        self.downloads_dir = self.base_dir / "downloads"
         self.metadata_dir = self.base_dir / "metadata"
 
-        self.download_dir.mkdir(parents=True, exist_ok=True)
+        self.downloads_dir.mkdir(parents=True, exist_ok=True)
         self.metadata_dir.mkdir(parents=True, exist_ok=True)
 
     def _format_date(self, date: datetime):
@@ -80,7 +80,7 @@ class Extractor:
             return
 
         nome_arquivo = f"diario-alac-{target_date.strftime('%Y-%m-%d')}.pdf"
-        local_path = self.download_dir / nome_arquivo
+        local_path = self.downloads_dir / nome_arquivo
 
         with open(local_path, "wb") as f:
             f.write(download_response.content)

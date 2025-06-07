@@ -14,17 +14,11 @@ from datapub.shared.utils.extractor_base import ExtractorBase
 class ALGOExtractor(ExtractorBase):
     def __init__(self):
         super().__init__(entity="ALGO", base_dir="storage/raw/al_go")
-        self.base_dir = Path(base_dir)
-        self.downloads_dir = self.base_dir / "downloads"
-        self.metadata_dir = self.base_dir / "metadata"
-        
-        self.downloads_dir.mkdir(parents=True, exist_ok=True)
-        self.metadata_dir.mkdir(parents=True, exist_ok=True)
 
         self.page_url_template = "https://transparencia.al.go.leg.br/gestao-parlamentar/diario?ano={}&mes={}"
 
         chrome_options = Options()
-        if headless:
+        if self.headless:
             chrome_options.add_argument("--headless=new") 
             chrome_options.add_argument("--disable-gpu")
             chrome_options.add_argument("--no-sandbox")
@@ -85,7 +79,7 @@ class ALGOExtractor(ExtractorBase):
         filepath = self.downloads_dir / filename
 
         if filepath.exists():
-            print(f"⏭️ [{date_str}] Já existe, pulando.")
+            print(f"⏭️ [{date}] Já existe, pulando.")
             return True
 
         try:
@@ -95,7 +89,8 @@ class ALGOExtractor(ExtractorBase):
                     f.write(response.content)
 
                 file_hash = hashlib.md5(response.content).hexdigest()
-                self._save_metadata(date_str, url, filepath, file_hash)
+                date = datetime.strptime(date, "%Y-%m-%d")
+                self._save_metadata(date, filename, url, filepath, file_hash)
 
                 print(f"✅ [{date_str}] Baixado com sucesso | Hash: {file_hash[:8]}")
                 return True
@@ -106,31 +101,14 @@ class ALGOExtractor(ExtractorBase):
             print(f"❌ [{date_str}] Erro ao baixar: {e}")
             return False
 
-    def _save_metadata(self, date_str, url, filepath, file_hash):
-        metadata = {
-            "orgao": "AL-EGO",
-            "data_publicacao": date_str,
-            "url_origem": url,
-            "caminho_local": str(filepath),
-            "data_download": datetime.now().isoformat(),
-            "tamanho_bytes": os.path.getsize(filepath),
-            "hash_md5": file_hash,
-            "status": "sucesso",
-        }
-
-        metadata_path = self.metadata_dir / f"metadata_{date_str}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
-
-        with open(metadata_path, "w", encoding="utf-8") as f:
-            json.dump(metadata, f, ensure_ascii=False, indent=2)
-
-
 if __name__ == "__main__":
-    extractor = Extractor(headless=True)
+    extractor = ALGOExtractor(headless=True)
 
     start_date = datetime.date(2007, 8, 1)
-    end_date = datetime.date(2007, 8, 31)
+    end_date = datetime.now().date()
 
-    print(f"🚀 Iniciando download de diários da AL-EGO de {start_date} a {end_date}")
+    print(f"🚀 Iniciando download de diários oficiais da AL-GO de {start_date} a {end_date}")
+
     extractor.download(start_date, end_date)
 
     extractor.close()

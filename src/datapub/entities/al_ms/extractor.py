@@ -297,12 +297,12 @@ class Extractor:
         if hasattr(self, 'driver'):
             self.driver.quit()
 
-    def get_recent_complete_pdfs(download_dir: Path, since: float = 60.0) -> set[Path]:
+    def get_recent_complete_pdfs(downloads_dir: Path, since: float = 60.0) -> set[Path]:
         """Retorna arquivos PDF completos, excluindo temporários e antigos."""
         now = datetime.now()
         pdfs = set()
 
-        for file in download_dir.iterdir():
+        for file in downloads_dir.iterdir():
             if not file.name.lower().endswith(".pdf"):
                 continue
             if file.name.endswith(".crdownload") or file.name.startswith("~"):
