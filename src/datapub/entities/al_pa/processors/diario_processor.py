@@ -64,6 +64,7 @@ class ALPAProcessor(ProcessorBase):
                     self._save_result(file_path, result)
 
     def extract_text(self, file_path: Path) -> Optional[str]:
+        print(f"📦 Processando: {file_path.name}")
         if file_path.suffix.lower() != '.pdf':
             return None
 
@@ -71,18 +72,13 @@ class ALPAProcessor(ProcessorBase):
 
         with pdfplumber.open(file_path) as pdf:
             for idx, page in enumerate(pdf.pages, start=1):
-                text = page.extract_text()
-                if text:
-                    text_content.append(text)
-                else:
-                    # Convert page to image
-                    page_image = page.to_image(resolution=300).original.convert("L")  # grayscale
-                    page_image = ImageOps.autocontrast(page_image)
+                page_image = page.to_image(resolution=300).original.convert("L")  # escala de cinza
+                page_image = ImageOps.autocontrast(page_image)
 
-                    # OCR
-                    ocr_text = pytesseract.image_to_string(page_image, lang='por')  # idioma português
-                    print(f"🧠 OCR extraído da página {idx} de {file_path.name}")
-                    text_content.append(ocr_text)
+                # Executar OCR na imagem
+                ocr_text = pytesseract.image_to_string(page_image, lang='por')  # idioma português
+                print(f"🧠 OCR extraído da página {idx} de {file_path.name}")
+                text_content.append(ocr_text)
 
         return "\n".join(text_content)
 
