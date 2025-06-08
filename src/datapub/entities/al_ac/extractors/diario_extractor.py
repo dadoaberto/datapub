@@ -31,7 +31,7 @@ class ALACExtractor(ExtractorBase):
 
     def download(self, start=None, end=None):
         if start is None:
-            start = date(2025, 1, 1)
+            start = date(2011, 8, 1)
         else:
             start = dateparser.parse(start).date()
 
@@ -122,7 +122,7 @@ class ALACExtractor(ExtractorBase):
 if __name__ == "__main__":
     extractor = ALACExtractor()
 
-    start_date = datetime.date(2005, 1, 1)
+    start_date = datetime.date(2011, 8, 1)
     end_date = datetime.now().date()
 
     print(
