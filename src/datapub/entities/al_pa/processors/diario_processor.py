@@ -5,7 +5,9 @@ import argparse
 import dateparser
 from datetime import datetime, timedelta, date
 import pdfplumber
+import re
 import pytesseract
+from PIL import ImageOps
 
 from datapub.shared.utils.processor_base import ProcessorBase
 
@@ -24,9 +26,30 @@ class ALPAProcessor(ProcessorBase):
         start_date = dateparser.parse(start).date() if start else date(2021, 1, 1)
         end_date = dateparser.parse(end).date() if end else date.today()
 
-        files = sorted(self.metadata_dir.glob('*.json'), key=lambda f: f.name)
+        filtered_files = []
 
-        for file in files:
+        for file in sorted(self.metadata_dir.glob('*.json'), key=lambda f: f.name):
+            with open(file, "r", encoding="utf-8") as f_in:
+                metadata = json.load(f_in)
+                file_path = Path(metadata["path"])
+
+                match = re.search(r"(\d{4}-\d{2}-\d{2})(?:_(\d{4}-\d{2}-\d{2}))?", file_path.name)
+                if not match:
+                    continue
+
+                file_start_str = match.group(1)
+                file_end_str = match.group(2) or file_start_str
+
+                try:
+                    file_start_date = datetime.fromisoformat(file_start_str).date()
+                    file_end_date = datetime.fromisoformat(file_end_str).date()
+                except ValueError:
+                    continue
+
+                if file_end_date >= start_date and file_start_date <= end_date:
+                    filtered_files.append(file)
+
+        for file in filtered_files:
             with open(file, "r", encoding="utf-8") as f:
                 metadata = json.load(f)
                 file_path = Path(metadata["path"])
@@ -47,13 +70,18 @@ class ALPAProcessor(ProcessorBase):
         text_content = []
 
         with pdfplumber.open(file_path) as pdf:
-            for page in pdf.pages:
+            for idx, page in enumerate(pdf.pages, start=1):
                 text = page.extract_text()
                 if text:
                     text_content.append(text)
                 else:
-                    page_image = page.to_image(resolution=300).original
-                    ocr_text = pytesseract.image_to_string(page_image)
+                    # Convert page to image
+                    page_image = page.to_image(resolution=300).original.convert("L")  # grayscale
+                    page_image = ImageOps.autocontrast(page_image)
+
+                    # OCR
+                    ocr_text = pytesseract.image_to_string(page_image, lang='por')  # idioma português
+                    print(f"🧠 OCR extraído da página {idx} de {file_path.name}")
                     text_content.append(ocr_text)
 
         return "\n".join(text_content)
