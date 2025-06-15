@@ -9,7 +9,7 @@ class ProcessorBase(ABC):
         self.entity = entity
         self.processor_type = processor_type
         self.base_dir = Path(base_dir)
-        self.output_dir = self.base_dir / "processed"
+        self.output_dir = self.base_dir
         
         self.output_dir.mkdir(parents=True, exist_ok=True)
 
