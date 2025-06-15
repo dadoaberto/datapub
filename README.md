@@ -34,47 +34,6 @@ Você pode acessar os dados por meio do seguinte endpoint (via CloudFront):
 ## 🗂️ Estrutura do Projeto
 
 ```
-/datapub
-│
-├── src/                  
-│   └── databub/
-│       ├── __init__.py
-│       ├── /entities
-│       │   ├── /al_go
-│       │   │   ├── extractor.py
-│       │   │   ├── processing.py
-│       │   │   ├── models.py
-│       │   │   └── config.yaml
-│       │   ├── /al_ms
-│       │   │   └── ...
-│       ├── /shared
-│       │   ├── /utils  
-│       │   ├── /processing
-│       │   ├── /models
-│       │   └── /config
-│       ├── config.py
-│       ├── cli.py
-│       └── factory.py
-│
-├── /storage
-│   ├── /raw               # Documentos públicos originais (PDF, HTML, etc.)
-│   ├── /processed         # Textos extraídos, limpos e enriquecidos
-│   └── /structured        # Dados estruturados (JSON, CSV, banco de dados)
-│
-├── tests/                 
-│   ├── __init__.py
-│   ├── test_diario_alpa.py
-│   └── test_relatorios_gestao_alpa.py
-│
-├── docs/
-│
-├── .gitignore
-├── LICENSE
-├── pyproject.toml           # Configurações do projeto (PEP 518)
-├── setup.cfg                # Configurações do setuptools, lint, pytest, etc
-├── setup.py                 # Script de instalação
-├── requirements.txt         # Dependências
-└── README.rst               # Documentação
 
 ```
 

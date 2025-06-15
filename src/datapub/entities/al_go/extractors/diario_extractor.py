@@ -1,10 +1,9 @@
-import os
 import re
-import json
 import time
 import hashlib
-from pathlib import Path
 from datetime import datetime, date
+import dateparser
+import argparse
 
 import requests
 from selenium import webdriver
@@ -15,36 +14,53 @@ from datapub.shared.utils.extractor_base import ExtractorBase
 
 class ALGOExtractor(ExtractorBase):
     def __init__(self):
-        super().__init__(entity="ALGO", base_dir="storage/raw/al_go")
+        super().__init__(
+            entity="ALGO", base_dir="storage/raw/al_go", extractor_type="diario"
+        )
 
-        self.page_url_template = "https://transparencia.al.go.leg.br/gestao-parlamentar/diario?ano={}&mes={}"
+        self.base_url = (
+            "https://transparencia.al.go.leg.br/gestao-parlamentar/diario?ano={}&mes={}"
+        )
 
         chrome_options = Options()
         if self.headless:
-            chrome_options.add_argument("--headless=new") 
+            chrome_options.add_argument("--headless=new")
             chrome_options.add_argument("--disable-gpu")
             chrome_options.add_argument("--no-sandbox")
-        
+
         self.driver = webdriver.Chrome(options=chrome_options)
 
     def close(self):
         self.driver.quit()
 
-    def download(self, start_date=None, end_date=None):
-        if end_date is None:
-            end_date = date.today()
-        if start_date is None:
-            start_date = date(2007, 8, 1)
+    @staticmethod
+    def add_arguments(parser: argparse.ArgumentParser):
+        parser.add_argument("--start", help="Data inicial no formato YYYY-MM-DD")
+        parser.add_argument("--end", help="Data final no formato YYYY-MM-DD")
 
-        current_date = start_date
-        while current_date <= end_date:
+    def download(self, start=None, end=None):
+        if start is None:
+            start = date(2007, 8, 1)
+        else:
+            start = dateparser.parse(start).date()
+
+        if end is None:
+            end = date.today()
+        else:
+            end = dateparser.parse(end).date()
+
+        print(f"📡 Buscando edições de {start} até {end}")
+
+        current_date = start
+        
+        while current_date <= end:
             year = current_date.year
             month = current_date.month
             print(f"🔍 Processando {year}-{month:02d}")
             links = self._get_pdf_links_for_month(year, month)
 
             for date_str, url in links.items():
-                self._download_single_url(date_str, url)
+                self._download_single_url(current_date, url)
                 time.sleep(1)
 
             year = current_date.year + (current_date.month // 12)
@@ -52,7 +68,7 @@ class ALGOExtractor(ExtractorBase):
             current_date = date(year, month, 1)
 
     def _get_pdf_links_for_month(self, year, month):
-        url = self.page_url_template.format(year, month)
+        url = self.base_url.format(year, month)
         print(f"  - Carregando página: {url}")
         self.driver.get(url)
 
@@ -73,15 +89,16 @@ class ALGOExtractor(ExtractorBase):
         print(f"  - Encontrados {len(links)} links")
         return links
 
-    def _download_single_url(self, date_str, url):
+    def _download_single_url(self, date_target: date, url):
         match = re.search(r"diario-alego-(\d{4}-\d{2}-\d{2})\.pdf", url)
         date = match.group(1)
+        date_str = date_target.strftime("%Y-%m-%d")
 
-        filename = f"diario-alego-{date}.pdf"
+        filename = f"diario-alego-{date_str}.pdf"
         filepath = self.downloads_dir / filename
 
         if filepath.exists():
-            print(f"⏭️ [{date}] Já existe, pulando.")
+            print(f"⏭️ [{date_str}] Já existe, pulando.")
             return True
 
         try:
@@ -92,16 +109,19 @@ class ALGOExtractor(ExtractorBase):
 
                 file_hash = hashlib.md5(response.content).hexdigest()
                 date = datetime.strptime(date, "%Y-%m-%d")
-                self._save_metadata(date, filename, url, filepath, file_hash)
+                self._save_metadata(filename, url, filepath, "pdf", file_hash)
 
-                print(f"✅ [{date_str}] Baixado com sucesso | Hash: {file_hash[:8]}")
+                print(f"✅ [{date}] Baixado com sucesso | Hash: {file_hash[:8]}")
                 return True
             else:
-                print(f"⚠️ [{date_str}] Documento não encontrado ou inválido (HTTP {response.status_code})")
+                print(
+                    f"⚠️ [{date}] Documento não encontrado ou inválido (HTTP {response.status_code})"
+                )
                 return False
         except Exception as e:
-            print(f"❌ [{date_str}] Erro ao baixar: {e}")
+            print(f"❌ [{date}] Erro ao baixar: {e}")
             return False
+
 
 if __name__ == "__main__":
     extractor = ALGOExtractor()
@@ -109,7 +129,9 @@ if __name__ == "__main__":
     start_date = datetime.date(2007, 8, 1)
     end_date = datetime.now().date()
 
-    print(f"🚀 Iniciando download de diários oficiais da AL-GO de {start_date} a {end_date}")
+    print(
+        f"🚀 Iniciando download de diários oficiais da AL-GO de {start_date} a {end_date}"
+    )
 
     extractor.download(start_date, end_date)
 
