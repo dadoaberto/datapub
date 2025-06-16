@@ -5,6 +5,8 @@ import hashlib
 import argparse
 from pathlib import Path
 from datetime import datetime
+from cognee.api.v1.visualize.visualize import visualize_graph
+import shutil
 
 async def run_ingest(entity: str, file: str):
     try:
@@ -12,6 +14,8 @@ async def run_ingest(entity: str, file: str):
         meta_dir = Path("storage") / "processed" / entity / "metadata"
         meta_dir.mkdir(parents=True, exist_ok=True)
         meta_path = meta_dir / (file + ".meta.json")
+        structured_path = Path("storage") / "structured" / entity
+        structured_path.mkdir(parents=True, exist_ok=True)
 
         # if meta_path.exists():
         #     print(f"[INFO] Arquivo já processado anteriormente: {file}")
@@ -23,15 +27,21 @@ async def run_ingest(entity: str, file: str):
         
         await cognee.cognify()
         
-        results = await cognee.search(
-            query_text="Liste os eventos importantes"
-        )
+        # results = await cognee.search(
+        #     query_text="Liste os eventos importantes"
+        # )
         
-        for result in results:
-            print(result)
+        # for result in results:
+        #     print(result)
+        
+        print("📈 Generating visualization...")
+        await visualize_graph()
 
-        print(f"[INFO] Executando extractor para {entity} com o arquivo: {file}")
-        print(f"[INFO] Arquivo {file} da entidade {entity} ingerido com sucesso.")
+        html_file = Path("~/graph_visualization.html").expanduser()
+        destination = structured_path / (file + ".html")
+
+        if html_file.exists():
+            shutil.move(str(html_file), str(destination))
 
         content_hash = hashlib.md5(content.encode("utf-8")).hexdigest()
 
