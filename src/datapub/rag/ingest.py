@@ -1,45 +1,3 @@
-# import asyncio
-# import importlib
-# from pathlib import Path
-# import cognee
-
-# async def run_extraction(entity: str, file: str):
-#     try:
-#         root_dir = Path(__file__).resolve().parents[3]
-#         file_path = root_dir / "storage" / "processed" / entity / "processed" / file
-
-#         content = Path(file_path).read_text()
-        
-#         print(content)
-        
-#         await cognee.add(content)
-
-#         print(f"[INFO] Executando extractor para {entity} com o arquivo: {file}")
-        
-#         print(f"[INFO] Arquivo {file} da entidade {entity} ingerido com sucesso.")
-
-#     except FileNotFoundError:
-#         print(f"[ERROR] Arquivo não encontrado: {file_path}")
-#     except ModuleNotFoundError:
-#         print(f"[ERROR] Extractor da entidade '{entity}' não encontrado.")
-#     except Exception as e:
-#         print(f"[ERROR] Erro durante a execução: {str(e)}")
-
-    
-# def main():
-#     print("Ingestor CLI para Datapub")
-#     import argparse
-
-#     parser = argparse.ArgumentParser(description="Ingestor CLI para Datapub")
-#     parser.add_argument("--entity", type=str, required=True, help="Nome da entidade (ex: al_pa)")
-#     parser.add_argument("--file", type=str, required=True, help="Nome do arquivo (ex: diario-al_pa-2021-01-01_2021-01-08.txt)")
-
-#     args = parser.parse_args()
-#     asyncio.run(run_extraction(args.entity, args.file))
-
-# if __name__ == "__main__":
-#     main()
-
 import asyncio
 import cognee
 import json
@@ -48,34 +6,35 @@ import argparse
 from pathlib import Path
 from datetime import datetime
 
-
-async def run_extraction(entity: str, file: str):
+async def run_ingest(entity: str, file: str):
     try:
-        root_dir = Path(__file__).resolve().parents[3]
-        file_path = root_dir / "storage" / "processed" / entity / file
-
-        meta_dir = root_dir / "storage" / "processed" / entity / "metadata"
+        file_path = Path("storage") / "processed" / entity / file
+        meta_dir = Path("storage") / "processed" / entity / "metadata"
         meta_dir.mkdir(parents=True, exist_ok=True)
         meta_path = meta_dir / (file + ".meta.json")
 
-        # Verifica se já foi processado
-        if meta_path.exists():
-            print(f"[INFO] Arquivo já processado anteriormente: {file}")
-            return
+        # if meta_path.exists():
+        #     print(f"[INFO] Arquivo já processado anteriormente: {file}")
+        #     return
 
         content = file_path.read_text()
-
+        
         await cognee.add(content)
         
         await cognee.cognify()
+        
+        results = await cognee.search(
+            query_text="Liste os eventos importantes"
+        )
+        
+        for result in results:
+            print(result)
 
         print(f"[INFO] Executando extractor para {entity} com o arquivo: {file}")
         print(f"[INFO] Arquivo {file} da entidade {entity} ingerido com sucesso.")
 
-        # Gera hash simples (MD5) para controle de versão
         content_hash = hashlib.md5(content.encode("utf-8")).hexdigest()
 
-        # Salva os metadados da execução
         meta_info = {
             "entity": entity,
             "file": file,
@@ -90,11 +49,10 @@ async def run_extraction(entity: str, file: str):
 
     except FileNotFoundError:
         print(f"[ERROR] Arquivo não encontrado: {file_path}")
-    except ModuleNotFoundError:
-        print(f"[ERROR] Extractor da entidade '{entity}' não encontrado.")
+    except ModuleNotFoundError as e:
+        print(f"[ERROR] Erro: {str(e)}")
     except Exception as e:
         print(f"[ERROR] Erro durante a execução: {str(e)}")
-        # Tenta salvar erro mesmo se falhar a ingestão
         try:
             meta_dir.mkdir(parents=True, exist_ok=True)
             meta_path = meta_dir / (file + ".meta.json")
@@ -112,15 +70,24 @@ async def run_extraction(entity: str, file: str):
 
 
 def main():
-    print("Ingestor CLI para Datapub")
-
-    parser = argparse.ArgumentParser(description="Ingestor CLI para Datapub")
+    parser = argparse.ArgumentParser(description="Ingestor de arquivos")
     parser.add_argument("--entity", type=str, required=True, help="Nome da entidade (ex: al_pa)")
     parser.add_argument("--file", type=str, required=True, help="Nome do arquivo (ex: diario-al_pa-2021-01-01_2021-01-08.txt)")
-
+    # ingest --entity=al_pa --file="diario-al_pa-2021-01-01_2021-01-08.txt"
+    # docker-compose run --rm datapub ingest --entity=al_pa --file=diario-al_pa-2021-01-01_2021-01-08.txt
     args = parser.parse_args()
-    asyncio.run(run_extraction(args.entity, args.file))
+    asyncio.run(run_ingest(args.entity, args.file))
 
 
 if __name__ == "__main__":
     main()
+
+# from sqlalchemy import create_engine
+# def main():
+#     DATABASE_URL = "postgresql://cognee:cognee@postgres:5432/cognee_db"
+#     try:
+#         engine = create_engine(DATABASE_URL)
+#         with engine.connect() as conn:
+#             print("Conexão bem-sucedida!")
+#     except Exception as e:
+#         print(f"Falha na conexão: {e}")

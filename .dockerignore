@@ -1,0 +1,10 @@
+storage/
+__pycache__/
+*.pyc
+*.pyo
+*.log
+.eggs
+*.egg-info
+*.sqlite3
+tests/
+notebooks/

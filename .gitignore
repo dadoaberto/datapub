@@ -61,6 +61,7 @@ __pycache__/
 storage/raw/*/
 storage/processed/*/
 storage/structured/*/
+storage/search_results/*/
 
 # Distribution / packaging
 build/
