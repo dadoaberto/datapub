@@ -1,5 +1,5 @@
 from datetime import datetime
-from sqlalchemy import Column, DateTime, ForeignKey, Integer, String, Text, Date
+from sqlalchemy import Column, DateTime, ForeignKey, Integer, String, Text, Date, Index
 from sqlalchemy.orm import relationship
 
 from .base import Base
@@ -68,3 +68,36 @@ class Document(Base):
     document_type = relationship("DocumentType", back_populates="documents")
     state = relationship("State")
     municipality = relationship("Municipality")
+
+
+# ------------- Chat Models -------------
+class ChatSession(Base):
+    __tablename__ = "chat_sessions"
+    id = Column(Integer, primary_key=True)
+    title = Column(String(200), nullable=True)
+
+    # Optional filters/context at session level
+    entity = Column(String(50), nullable=True)
+    estado = Column(String(2), nullable=True)
+    municipio = Column(String(150), nullable=True)
+    orgao = Column(String(200), nullable=True)
+
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+
+    messages = relationship("ChatMessage", back_populates="session", cascade="all, delete-orphan")
+
+
+class ChatMessage(Base):
+    __tablename__ = "chat_messages"
+    id = Column(Integer, primary_key=True)
+    session_id = Column(Integer, ForeignKey("chat_sessions.id", ondelete="CASCADE"), nullable=False)
+    role = Column(String(20), nullable=False)  # user | assistant | system
+    content = Column(Text, nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+
+    session = relationship("ChatSession", back_populates="messages")
+
+    __table_args__ = (
+        Index("ix_chat_messages_session_created", "session_id", "created_at"),
+    )

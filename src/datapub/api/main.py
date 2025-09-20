@@ -1,10 +1,11 @@
 import asyncio
+import json
 import time
 from concurrent.futures import ThreadPoolExecutor
 import inspect
 import re
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, AsyncGenerator
 
 import os
 from fastapi import BackgroundTasks, FastAPI, HTTPException, Response, Request, Depends
@@ -13,7 +14,8 @@ from prometheus_client import Counter, Histogram, generate_latest, CONTENT_TYPE_
 from sqlalchemy import select
 
 from datapub.db.base import SessionLocal
-from datapub.db.models import Document, Orgao, State, Municipality, DocumentType
+from datetime import datetime
+from datapub.db.models import Document, Orgao, State, Municipality, DocumentType, ChatSession, ChatMessage
 from datapub.db.init_db import init_db as init_db_sync
 from datapub.etl.normalize import run_normalize
 from datapub.etl.ibge_localidades import run_sync_ibge
@@ -60,11 +62,47 @@ async def metrics_middleware(request: Request, call_next):
 
 # --------- Models ---------
 class ChatQuery(BaseModel):
-    query: str = Field(..., description="Texto da consulta")
-    estado: Optional[str] = Field(None, description="UF do estado, ex: PA")
-    municipio: Optional[str] = None
-    orgao: Optional[str] = Field(None, description="Órgão público, ex: ALEPA")
-    entity: Optional[str] = Field(None, description="Identificador interno, ex: al_pa")
+    query: str = Field(..., description="Texto da consulta", example="licitações saúde")
+    estado: Optional[str] = Field(None, description="UF do estado, ex: PA", example="PA")
+    municipio: Optional[str] = Field(None, example="Belém")
+    orgao: Optional[str] = Field(None, description="Órgão público, ex: ALEPA", example="ALEPA")
+    entity: Optional[str] = Field(None, description="Identificador interno, ex: al_pa", example="al_pa")
+
+
+class ChatSessionCreate(BaseModel):
+    title: Optional[str] = Field(None, example="meu chat")
+    estado: Optional[str] = Field(None, example="PA")
+    municipio: Optional[str] = Field(None, example="Belém")
+    orgao: Optional[str] = Field(None, example="ALEPA")
+    entity: Optional[str] = Field(None, example="al_pa")
+
+
+class ChatSessionOut(BaseModel):
+    id: int
+    title: Optional[str]
+    created_at: str
+    filters: Dict[str, Optional[str]]
+
+
+class ChatMessageIn(BaseModel):
+    query: str = Field(..., example="licitações saúde")
+    # Optional per-call override; otherwise use default
+    history_limit: Optional[int] = Field(None, example=10)
+
+
+class ChatSessionUpdate(BaseModel):
+    title: Optional[str] = Field(None, example="meu chat renomeado")
+    entity: Optional[str] = Field(None, example="al_pa")
+    estado: Optional[str] = Field(None, example="PA")
+    municipio: Optional[str] = Field(None, example="Belém")
+    orgao: Optional[str] = Field(None, example="ALEPA")
+
+
+class ChatMessageOut(BaseModel):
+    id: int
+    role: str
+    content: str
+    created_at: str
 
 
 class TriggerExtractor(BaseModel):
@@ -262,7 +300,7 @@ async def entities():
     }
 
 
-@app.post("/chat/search")
+@app.post("/chat/search", tags=["Chat"], summary="Busca rápida com filtros (sem sessão)")
 async def chat_search(payload: ChatQuery):
     filters = []
     if payload.entity:
@@ -278,8 +316,16 @@ async def chat_search(payload: ChatQuery):
     if filters:
         query_text = f"{payload.query}\n\nContexto/Restrições: {', '.join(filters)}"
 
+    # Build structured metadata/context for Cognee when supported
+    meta = {
+        "entity": payload.entity,
+        "estado": payload.estado,
+        "municipio": payload.municipio,
+        "orgao": payload.orgao,
+    }
+    ctx = {"filters": filters}
     try:
-        results = await cognee.search(query_text=query_text)
+        results = await _cognee_search(query_text=query_text, context=ctx, metadata=meta)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Erro ao consultar Cognee: {e}")
 
@@ -288,6 +334,482 @@ async def chat_search(payload: ChatQuery):
         "filters": filters,
         "results": results,
     }
+
+
+# --------- Chat with History ---------
+def _compose_filters(entity: Optional[str], estado: Optional[str], municipio: Optional[str], orgao: Optional[str]) -> List[str]:
+    filters: List[str] = []
+    if entity:
+        filters.append(f"entidade:{entity}")
+    if estado:
+        filters.append(f"estado:{estado}")
+    if municipio:
+        filters.append(f"municipio:{municipio}")
+    if orgao:
+        filters.append(f"orgao:{orgao}")
+    return filters
+
+
+def _apply_filters_to_query(query: str, filters: List[str]) -> str:
+    if not filters:
+        return query
+    return f"{query}\n\nContexto/Restrições: {', '.join(filters)}"
+
+
+def _get_last_messages(db, session_id: int, limit: int) -> List[ChatMessage]:
+    q = (
+        db.query(ChatMessage)
+        .filter(ChatMessage.session_id == session_id)
+        .order_by(ChatMessage.created_at.desc(), ChatMessage.id.desc())
+        .limit(limit)
+    )
+    rows = list(q.all())
+    rows.reverse()  # chronological order
+    return rows
+
+
+def _history_as_text(messages: List[ChatMessage]) -> str:
+    if not messages:
+        return ""
+    lines: List[str] = ["Histórico de conversa (recente primeiro):"]
+    for m in messages[-10:]:  # cap snippet in text; final limit controlled separately
+        role = m.role
+        content = (m.content or "").strip()
+        if not content:
+            continue
+        lines.append(f"- {role}: {content}")
+    return "\n".join(lines)
+
+
+@app.post(
+    
+    "/chat/sessions",
+    response_model=ChatSessionOut,
+    tags=["Chat"],
+    summary="Cria uma sessão de chat",
+    responses={
+        200: {
+            "content": {
+                "application/json": {
+                    "examples": {
+                        "default": {
+                            "summary": "Sessão criada",
+                            "value": {
+                                "id": 1,
+                                "title": "meu chat",
+                                "created_at": "2025-09-20T12:34:56Z",
+                                "filters": {"entity": "al_pa", "estado": "PA", "municipio": "Belém", "orgao": "ALEPA"},
+                            },
+                        }
+                    }
+                }
+            }
+        }
+    },
+)
+async def create_chat_session(body: ChatSessionCreate, db=Depends(get_db)):
+    sess = ChatSession(
+        title=body.title,
+        entity=(body.entity or None),
+        estado=(body.estado or None),
+        municipio=(body.municipio or None),
+        orgao=(body.orgao or None),
+    )
+    db.add(sess)
+    db.commit()
+    db.refresh(sess)
+    return ChatSessionOut(
+        id=sess.id,
+        title=sess.title,
+        created_at=sess.created_at.isoformat(),
+        filters={
+            "entity": sess.entity,
+            "estado": sess.estado,
+            "municipio": sess.municipio,
+            "orgao": sess.orgao,
+        },
+    )
+
+
+@app.get(
+    "/chat/sessions",
+    response_model=List[ChatSessionOut],
+    tags=["Chat"],
+    summary="Lista sessões de chat",
+    responses={
+        200: {
+            "content": {
+                "application/json": {
+                    "examples": {
+                        "default": {
+                            "summary": "Lista de sessões",
+                            "value": [
+                                {
+                                    "id": 1,
+                                    "title": "meu chat",
+                                    "created_at": "2025-09-20T12:34:56Z",
+                                    "filters": {"entity": "al_pa", "estado": "PA", "municipio": "Belém", "orgao": "ALEPA"},
+                                }
+                            ],
+                        }
+                    }
+                }
+            }
+        }
+    },
+)
+async def list_chat_sessions(limit: int = 50, offset: int = 0, db=Depends(get_db)):
+    q = db.query(ChatSession).order_by(ChatSession.updated_at.desc(), ChatSession.id.desc())
+    rows = q.limit(limit).offset(offset).all()
+    return [
+        ChatSessionOut(
+            id=s.id,
+            title=s.title,
+            created_at=s.created_at.isoformat(),
+            filters={"entity": s.entity, "estado": s.estado, "municipio": s.municipio, "orgao": s.orgao},
+        )
+        for s in rows
+    ]
+
+
+@app.get(
+    "/chat/sessions/{session_id}",
+    response_model=ChatSessionOut,
+    tags=["Chat"],
+    summary="Obtém uma sessão",
+    responses={
+        200: {
+            "content": {
+                "application/json": {
+                    "examples": {
+                        "default": {
+                            "summary": "Sessão",
+                            "value": {
+                                "id": 1,
+                                "title": "meu chat",
+                                "created_at": "2025-09-20T12:34:56Z",
+                                "filters": {"entity": "al_pa", "estado": "PA", "municipio": "Belém", "orgao": "ALEPA"},
+                            },
+                        }
+                    }
+                }
+            }
+        }
+    },
+)
+async def get_chat_session(session_id: int, db=Depends(get_db)):
+    s = db.query(ChatSession).get(session_id)
+    if not s:
+        raise HTTPException(status_code=404, detail="Sessão não encontrada")
+    return ChatSessionOut(
+        id=s.id,
+        title=s.title,
+        created_at=s.created_at.isoformat(),
+        filters={"entity": s.entity, "estado": s.estado, "municipio": s.municipio, "orgao": s.orgao},
+    )
+
+
+@app.get(
+    "/chat/sessions/{session_id}/messages",
+    response_model=List[ChatMessageOut],
+    tags=["Chat"],
+    summary="Lista mensagens da sessão",
+    responses={
+        200: {
+            "content": {
+                "application/json": {
+                    "examples": {
+                        "default": {
+                            "summary": "Mensagens",
+                            "value": [
+                                {"id": 1, "role": "user", "content": "licitações saúde", "created_at": "2025-09-20T12:35:00Z"},
+                                {"id": 2, "role": "assistant", "content": "1. Doc 1 — http://x/1", "created_at": "2025-09-20T12:35:01Z"},
+                            ],
+                        }
+                    }
+                }
+            }
+        }
+    },
+)
+async def list_chat_messages(session_id: int, limit: int = 50, offset: int = 0, db=Depends(get_db)):
+    if not db.query(ChatSession).get(session_id):
+        raise HTTPException(status_code=404, detail="Sessão não encontrada")
+    q = db.query(ChatMessage).filter(ChatMessage.session_id == session_id).order_by(ChatMessage.created_at.asc(), ChatMessage.id.asc())
+    rows = q.limit(limit).offset(offset).all()
+    return [
+        ChatMessageOut(id=m.id, role=m.role, content=m.content, created_at=m.created_at.isoformat())
+        for m in rows
+    ]
+
+
+def _format_results_as_text(results: List[Dict]) -> str:
+    lines: List[str] = []
+    for i, r in enumerate(results[:5], start=1):
+        title = r.get("title") or r.get("titulo") or r.get("text") or r.get("content") or "resultado"
+        url = r.get("url") or r.get("link")
+        if url:
+            lines.append(f"{i}. {title} — {url}")
+        else:
+            lines.append(f"{i}. {title}")
+    if not lines:
+        lines = ["Nenhum resultado encontrado."]
+    return "\n".join(lines)
+
+
+@app.post(
+    "/chat/sessions/{session_id}/query",
+    response_model=Dict[str, object],
+    tags=["Chat"],
+    summary="Pergunta síncrona na sessão",
+    responses={
+        200: {
+            "content": {
+                "application/json": {
+                    "examples": {
+                        "default": {
+                            "summary": "Resposta com resultados",
+                            "value": {
+                                "session_id": 1,
+                                "filters": ["entidade:al_pa", "estado:PA"],
+                                "history_used": 10,
+                                "query": "licitações saúde",
+                                "results": [{"title": "Doc 1", "url": "http://x/1"}],
+                                "assistant": "1. Doc 1 — http://x/1",
+                            },
+                        }
+                    }
+                }
+            }
+        }
+    },
+)
+async def chat_query_session(session_id: int, body: ChatMessageIn, db=Depends(get_db)):
+    s = db.query(ChatSession).get(session_id)
+    if not s:
+        raise HTTPException(status_code=404, detail="Sessão não encontrada")
+
+    # Persist user message
+    user_msg = ChatMessage(session_id=s.id, role="user", content=body.query)
+    db.add(user_msg)
+    db.flush()
+
+    # Build query with session filters and recent history
+    filters = _compose_filters(s.entity, s.estado, s.municipio, s.orgao)
+    history_limit = max(0, int(body.history_limit) if body.history_limit is not None else int(os.getenv("CHAT_HISTORY_LIMIT", "10")))
+    history_msgs = _get_last_messages(db, s.id, history_limit + 1)  # includes current user message
+    history_text = _history_as_text(history_msgs[:-1])  # prior messages only
+    query_text = body.query
+    if history_text:
+        query_text = f"{history_text}\n\nPergunta atual: {query_text}"
+    query_text = _apply_filters_to_query(query_text, filters)
+
+    # Structured context
+    ctx = {
+        "session_id": s.id,
+        "filters": filters,
+        "history": [{"role": m.role, "content": m.content, "created_at": m.created_at.isoformat()} for m in history_msgs[:-1]],
+    }
+    meta = {"entity": s.entity, "estado": s.estado, "municipio": s.municipio, "orgao": s.orgao}
+    try:
+        results = await _cognee_search(query_text=query_text, context=ctx, metadata=meta)
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"Erro ao consultar Cognee: {e}")
+
+    # Prepare assistant content (simple textual summary of results)
+    assistant_text = _format_results_as_text(results)
+
+    # Persist assistant message
+    asst_msg = ChatMessage(session_id=s.id, role="assistant", content=assistant_text)
+    db.add(asst_msg)
+    # Touch session updated_at
+    s.updated_at = datetime.utcnow()
+    db.commit()
+    db.refresh(s)
+
+    return {
+        "session_id": s.id,
+        "filters": filters,
+        "history_used": history_limit,
+        "query": body.query,
+        "results": results,
+        "assistant": assistant_text,
+    }
+
+
+@app.post("/chat/sessions/{session_id}/stream", tags=["Chat"], summary="Pergunta com resposta em streaming (SSE)")
+async def chat_stream_session(session_id: int, body: ChatMessageIn, db=Depends(get_db)):
+    s = db.query(ChatSession).get(session_id)
+    if not s:
+        raise HTTPException(status_code=404, detail="Sessão não encontrada")
+
+    # Persist user message early
+    user_msg = ChatMessage(session_id=s.id, role="user", content=body.query)
+    db.add(user_msg)
+    db.flush()
+
+    filters = _compose_filters(s.entity, s.estado, s.municipio, s.orgao)
+    history_limit = max(0, int(body.history_limit) if body.history_limit is not None else int(os.getenv("CHAT_HISTORY_LIMIT", "10")))
+    history_msgs = _get_last_messages(db, s.id, history_limit + 1)
+    history_text = _history_as_text(history_msgs[:-1])
+    query_text = body.query
+    if history_text:
+        query_text = f"{history_text}\n\nPergunta atual: {query_text}"
+    query_text = _apply_filters_to_query(query_text, filters)
+
+    ctx = {
+        "session_id": s.id,
+        "filters": filters,
+        "history": [{"role": m.role, "content": m.content, "created_at": m.created_at.isoformat()} for m in history_msgs[:-1]],
+    }
+    meta = {"entity": s.entity, "estado": s.estado, "municipio": s.municipio, "orgao": s.orgao}
+    try:
+        results = await _cognee_search(query_text=query_text, context=ctx, metadata=meta)
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"Erro ao consultar Cognee: {e}")
+
+    assistant_text = _format_results_as_text(results)
+
+    # Persist assistant full message (even though we stream chunks)
+    asst_msg = ChatMessage(session_id=s.id, role="assistant", content=assistant_text)
+    db.add(asst_msg)
+    s.updated_at = datetime.utcnow()
+    db.commit()
+
+    async def event_gen() -> AsyncGenerator[bytes, None]:
+        # Basic SSE stream with prelude, chunks, and end
+        pre = {"type": "start", "session_id": s.id, "filters": filters, "history_used": history_limit}
+        yield f"data: {json.dumps(pre, ensure_ascii=False)}\n\n".encode("utf-8")
+
+        chunk_size = 80
+        for i in range(0, len(assistant_text), chunk_size):
+            part = assistant_text[i:i+chunk_size]
+            payload = {"type": "chunk", "content": part}
+            yield f"data: {json.dumps(payload, ensure_ascii=False)}\n\n".encode("utf-8")
+            await asyncio.sleep(0)  # allow event loop to switch
+
+        end = {"type": "end"}
+        yield f"data: {json.dumps(end)}\n\n".encode("utf-8")
+
+    return Response(event_gen(), media_type="text/event-stream")
+
+
+@app.delete(
+    "/chat/sessions/{session_id}",
+    tags=["Chat"],
+    summary="Apaga sessão de chat",
+    responses={
+        200: {
+            "content": {
+                "application/json": {
+                    "examples": {
+                        "default": {
+                            "summary": "Sessão apagada",
+                            "value": {"status": "deleted", "session_id": 1},
+                        }
+                    }
+                }
+            }
+        }
+    },
+)
+async def delete_chat_session(session_id: int, db=Depends(get_db)):
+    s = db.query(ChatSession).get(session_id)
+    if not s:
+        raise HTTPException(status_code=404, detail="Sessão não encontrada")
+    db.delete(s)
+    db.commit()
+    return {"status": "deleted", "session_id": session_id}
+
+
+@app.delete(
+    "/chat/sessions/{session_id}/messages",
+    tags=["Chat"],
+    summary="Limpa mensagens da sessão",
+    responses={
+        200: {
+            "content": {
+                "application/json": {
+                    "examples": {
+                        "default": {
+                            "summary": "Mensagens limpas",
+                            "value": {"status": "cleared", "session_id": 1, "deleted": 2},
+                        }
+                    }
+                }
+            }
+        }
+    },
+)
+async def clear_chat_messages(session_id: int, db=Depends(get_db)):
+    s = db.query(ChatSession).get(session_id)
+    if not s:
+        raise HTTPException(status_code=404, detail="Sessão não encontrada")
+    # delete in bulk
+    count = db.query(ChatMessage).filter(ChatMessage.session_id == session_id).delete(synchronize_session=False)
+    s.updated_at = datetime.utcnow()
+    db.commit()
+    return {"status": "cleared", "session_id": session_id, "deleted": count}
+
+
+@app.patch(
+    "/chat/sessions/{session_id}",
+    response_model=ChatSessionOut,
+    tags=["Chat"],
+    summary="Renomeia sessão de chat",
+    responses={
+        200: {
+            "content": {
+                "application/json": {
+                    "examples": {
+                        "default": {
+                            "summary": "Sessão renomeada",
+                            "value": {
+                                "id": 1,
+                                "title": "novo título",
+                                "created_at": "2025-09-20T12:34:56Z",
+                                "filters": {"entity": "al_pa", "estado": "PA", "municipio": "Belém", "orgao": "ALEPA"},
+                            },
+                        }
+                    }
+                }
+            }
+        }
+    },
+)
+async def rename_chat_session(session_id: int, body: ChatSessionUpdate, db=Depends(get_db)):
+    s = db.query(ChatSession).get(session_id)
+    if not s:
+        raise HTTPException(status_code=404, detail="Sessão não encontrada")
+    if body.title is not None:
+        s.title = body.title
+    if body.entity is not None:
+        s.entity = body.entity or None
+    if body.estado is not None:
+        s.estado = body.estado or None
+    if body.municipio is not None:
+        s.municipio = body.municipio or None
+    if body.orgao is not None:
+        s.orgao = body.orgao or None
+    s.updated_at = datetime.utcnow()
+    db.commit()
+    db.refresh(s)
+    return ChatSessionOut(
+        id=s.id,
+        title=s.title,
+        created_at=s.created_at.isoformat(),
+        filters={"entity": s.entity, "estado": s.estado, "municipio": s.municipio, "orgao": s.orgao},
+    )
+    s = db.query(ChatSession).get(session_id)
+    if not s:
+        raise HTTPException(status_code=404, detail="Sessão não encontrada")
+    # delete in bulk
+    count = db.query(ChatMessage).filter(ChatMessage.session_id == session_id).delete(synchronize_session=False)
+    s.updated_at = datetime.utcnow()
+    db.commit()
+    return {"status": "cleared", "session_id": session_id, "deleted": count}
 
 
 def _run_extractor_sync(entity: str, tipo: str, start: Optional[str], end: Optional[str], headless: bool):
@@ -695,3 +1217,10 @@ async def help_parameters():
                 )
 
     return HelpParametersOut(extractors=ex_items, processors=pr_items)
+# --------- Cognee helper with context ---------
+async def _cognee_search(query_text: str, context: Optional[Dict] = None, metadata: Optional[Dict] = None):
+    try:
+        return await cognee.search(query_text=query_text, context=context, metadata=metadata)  # type: ignore[call-arg]
+    except TypeError:
+        # Older cognee versions may not support extra kwargs
+        return await cognee.search(query_text=query_text)

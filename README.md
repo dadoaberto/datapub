@@ -336,6 +336,52 @@ curl -X POST http://localhost:8000/chat/search \
   -d '{"query":"licitações saúde","entity":"al_pa","estado":"PA"}'
 ```
 
+- Chat com histórico e streaming
+  - Criar sessão com filtros padrões (persistidos):
+
+```
+curl -X POST http://localhost:8000/chat/sessions \
+  -H 'Content-Type: application/json' \
+  -d '{"title":"meu chat","entity":"al_pa","estado":"PA","municipio":"Belém","orgao":"ALEPA"}'
+```
+
+  - Perguntar (síncrono, usa histórico recente):
+
+```
+curl -X POST http://localhost:8000/chat/sessions/<ID>/query \
+  -H 'Content-Type: application/json' \
+  -d '{"query":"licitações saúde","history_limit":10}'
+```
+
+  - Perguntar (stream SSE):
+
+```
+curl -N -X POST http://localhost:8000/chat/sessions/<ID>/stream \
+  -H 'Accept: text/event-stream' \
+  -H 'Content-Type: application/json' \
+  -d '{"query":"licitações saúde","history_limit":10}'
+```
+
+  - Listar/limpar/apagar:
+
+```
+curl http://localhost:8000/chat/sessions
+curl http://localhost:8000/chat/sessions/<ID>/messages
+curl -X DELETE http://localhost:8000/chat/sessions/<ID>/messages
+curl -X DELETE http://localhost:8000/chat/sessions/<ID>
+```
+
+Integração com Cognee (contexto)
+- A API envia ao Cognee, quando suportado, um `context` estruturado com:
+  - `session_id`: ID da sessão de chat
+  - `filters`: lista de filtros ativos (`entity`, `estado`, `municipio`, `orgao`)
+  - `history`: últimas mensagens com `{role, content, created_at}`
+- Também envia `metadata` com os filtros para enriquecer a busca.
+- Para versões do Cognee sem suporte a `context`/`metadata`, a API concatena os filtros e trechos do histórico ao `query_text` como fallback.
+
+Configuração
+- `CHAT_HISTORY_LIMIT` (opcional): padrão de quantas mensagens recentes incluir no contexto (default: 10).
+
 - Reset do banco do Cognee (caso haja erro de schema após atualizar versão)
 
 ```

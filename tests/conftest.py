@@ -15,8 +15,8 @@ def mock_cognee_module(monkeypatch):
 
     mod = types.ModuleType("cognee")
 
-    async def _search(query_text: str):
-        return [{"score": 0.99, "text": f"result for: {query_text}"}]
+    async def _search(query_text: str, **kwargs):
+        return [{"score": 0.99, "text": f"result for: {query_text}", "context": kwargs}]
 
     async def _add(content: str):
         return None
@@ -69,6 +69,19 @@ def mock_datapub_cli(monkeypatch):
     monkeypatch.setitem(sys.modules, "datapub.cli", fake_cli)
     yield
     sys.modules.pop("datapub.cli", None)
+
+
+@pytest.fixture(autouse=True)
+def setup_sqlite_db(monkeypatch):
+    """Use a local SQLite file DB for tests and ensure tables exist."""
+    import os
+    # Use file-based sqlite to persist across connections
+    monkeypatch.setenv("APP_DATABASE_URL", "sqlite:///./test_chat.db")
+    # Create tables
+    from datapub.db.base import Base, engine
+    Base.metadata.create_all(bind=engine)
+    yield
+    # No teardown: keep file for debugging; in CI it will be ephemeral
 
 
 @pytest.fixture

@@ -22,8 +22,9 @@ def test_chat_search_with_filters(client, monkeypatch):
     # Ensure the cognee.search is called and response is proxied back
     called = {}
 
-    async def fake_search(query_text: str):
+    async def fake_search(query_text: str, **kwargs):
         called["query_text"] = query_text
+        called["kwargs"] = kwargs
         return [{"text": "ok"}]
 
     import datapub.api.main as api
@@ -43,6 +44,8 @@ def test_chat_search_with_filters(client, monkeypatch):
     assert data["results"] == [{"text": "ok"}]
     # Filters must be reflected in the composed query
     assert "Contexto/Restrições" in called["query_text"]
+    # New integration: may pass context kwargs when supported
+    assert isinstance(called.get("kwargs"), dict)
 
 
 def test_extractor_run_schedules(client, monkeypatch):
