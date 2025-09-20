@@ -1,0 +1,15 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+scrape_configs:
+  - job_name: "datapub_api"
+    metrics_path: "/metrics"
+    static_configs:
+      - targets: ["datapub:8000"]
+
+  - job_name: "datapub_scheduler"
+    metrics_path: "/metrics"
+    static_configs:
+      - targets: ["datapub-scheduler:9100"]
+

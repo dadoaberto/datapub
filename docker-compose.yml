@@ -8,7 +8,7 @@ services:
       - ./src:/app/src
       - ./storage:/app/storage
     working_dir: /app
-    command: bash
+    command: uvicorn datapub.api.main:app --host 0.0.0.0 --port 8000
     depends_on:
       - postgres
       - neo4j
@@ -19,6 +19,8 @@ services:
       PYTHONDONTWRITEBYTECODE: 1
       DATABASE_URL: postgresql://cognee:cognee@postgres:5432/cognee_db
       NEO4J_URL: bolt://neo4j:7687
+    ports:
+      - "8000:8000"
 
   postgres:
     build:
@@ -65,7 +67,85 @@ services:
       - neo4j_data:/data
       # - ./plugins:/plugins
 
+  scheduler:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: datapub-scheduler
+    depends_on:
+      - datapub
+    env_file:
+      - .env
+    environment:
+      CRON_PIPELINE: "0 3 * * *"  # 03:00 UTC diariamente
+      ENTITIES: "al_pa,al_go"      # execute para estas entidades (opcional)
+      START: "2021-01-01"         # padrão global; pode usar <ENTITY>_START
+    volumes:
+      - ./src:/app/src
+      - ./storage:/app/storage
+    ports:
+      - "9100:9100"  # Prometheus metrics
+    command: python -m datapub.scheduler
+
+  tests:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: datapub-tests
+    depends_on:
+      - postgres
+      - neo4j
+    env_file:
+      - .env
+    volumes:
+      - ./src:/app/src
+      - ./tests:/app/tests
+      - ./storage:/app/storage
+    working_dir: /app
+    command: bash -lc "pip install -e .[sqlalchemy] .[testing] && pytest -q"
+
+  swagger-ui:
+    image: swaggerapi/swagger-ui:latest
+    container_name: swagger-ui
+    depends_on:
+      - datapub
+    ports:
+      - "8080:8080"
+    environment:
+      # Multiple API specs (dynamic from app and static exported file)
+      - URLS=[{"name":"datapub","url":"http://datapub:8000/openapi.json"},{"name":"datapub-static","url":"/openapi.json"}]
+    volumes:
+      # Serve static exported spec at http://localhost:8080/openapi.json
+      - ./openapi/openapi.json:/usr/share/nginx/html/openapi.json:ro
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    depends_on:
+      - datapub
+      - scheduler
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    depends_on:
+      - prometheus
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./grafana/provisioning/datasources:/etc/grafana/provisioning/datasources:ro
+      - ./grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards:ro
+      - ./grafana/dashboards:/etc/grafana/dashboards:ro
+
 volumes:
   pg_data:
   pgadmin_data:
   neo4j_data:
+  grafana_data:
