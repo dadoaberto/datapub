@@ -6,10 +6,14 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
 
 
+# Prefer dedicated app database URL, fall back to generic DATABASE_URL
 DATABASE_URL = os.getenv(
-    "DATABASE_URL",
-    # Fallback to env components
-    f"postgresql+psycopg://{os.getenv('DB_USERNAME','cognee')}:{os.getenv('DB_PASSWORD','cognee')}@{os.getenv('DB_HOST','postgres')}:{os.getenv('DB_PORT','5432')}/{os.getenv('DB_NAME','cognee_db')}",
+    "APP_DATABASE_URL",
+    os.getenv(
+        "DATABASE_URL",
+        # Fallback to env components (prefer APP_DB_*, then DB_*)
+        f"postgresql+psycopg://{os.getenv('APP_DB_USERNAME', os.getenv('DB_USERNAME','cognee'))}:{os.getenv('APP_DB_PASSWORD', os.getenv('DB_PASSWORD','cognee'))}@{os.getenv('APP_DB_HOST', os.getenv('DB_HOST','postgres'))}:{os.getenv('APP_DB_PORT', os.getenv('DB_PORT','5432'))}/{os.getenv('APP_DB_NAME', os.getenv('DB_NAME','datapub_db'))}",
+    ),
 )
 
 
@@ -29,4 +33,3 @@ def session_scope() -> Iterator:
         raise
     finally:
         session.close()
-

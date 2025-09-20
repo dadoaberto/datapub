@@ -103,6 +103,10 @@ Depois acesse o menu no Swagger UI e selecione “datapub-static”.
 - Listar documentos: `GET /documents?estado=PA&orgao=Assembleia&tipo=Diário&q=saúde&limit=20`
 - Admin inicializar DB: `POST /admin/init-db`
 - Rodar ETL (normalização): `POST /etl/run` body `{ "entity": "al_pa" }` (opcional)
+- Geo (filtros):
+  - `GET /estados`
+  - `GET /estados?order=nome|ibge_id|uf&order_dir=asc|desc`
+  - `GET /municipios?uf=PA&q=Bel&order=nome|ibge_id&order_dir=asc|desc` (autocomplete/filtragem)
 
 10) Autenticação (API Key)
 
@@ -120,7 +124,13 @@ Depois acesse o menu no Swagger UI e selecione “datapub-static”.
 - Inicializar o schema:
 
 ```
-docker-compose run --rm datapub init-db
+docker-compose run --rm datapub bash -lc ./scripts/init_app_db.sh
+```
+
+Ou usando o serviço one‑shot dedicado:
+
+```
+docker-compose run --rm app-db-init
 ```
 
 - Popular com metadados (ETL simplificado a partir de `storage/raw/*/metadata/*.json`):
@@ -129,9 +139,24 @@ docker-compose run --rm datapub init-db
 docker-compose run --rm datapub etl
 ```
 
+- Sincronizar estados e municípios (IBGE):
+
+```
+docker-compose run --rm datapub etl-ibge
+# ou via API: POST /admin/sync-ibge
+```
+
+- O ETL IBGE preenche `ibge_id` em `states` e `municipalities`, que podem ser usados em integrações futuras.
+
 - Buscar documentos pela API:
   - `GET /documents?estado=PA&orgao=Assembleia&tipo=Diário&q=saúde&limit=20`
   - Resposta segue estrutura normalizada (titulo, url, data_publicacao, orgao_nome/tipo/estado/cidade, tipo_documento_nome).
+
+Notas:
+- O projeto usa dois bancos Postgres distintos dentro do mesmo container `postgres`:
+  - `cognee_db` (variável `DATABASE_URL`): usado internamente pelo Cognee (embeddings/estado).
+  - `datapub_db` (variável `APP_DATABASE_URL`): usado pela API para os documentos normalizados e filtros.
+- O compose monta `docker/postgres-init/00-create-app-db.sql` para criar `datapub_db` na primeira inicialização do Postgres.
 
 9) URLs públicas (S3/CloudFront)
 

@@ -18,6 +18,7 @@ services:
       PYTHONUNBUFFERED: 1
       PYTHONDONTWRITEBYTECODE: 1
       DATABASE_URL: postgresql://cognee:cognee@postgres:5432/cognee_db
+      APP_DATABASE_URL: postgresql+psycopg://cognee:cognee@postgres:5432/datapub_db
       NEO4J_URL: bolt://neo4j:7687
     ports:
       - "8000:8000"
@@ -35,8 +36,14 @@ services:
       POSTGRES_DB: ${DB_NAME}
     volumes:
       - pg_data:/var/lib/postgresql/data
+      - ./docker/postgres-init:/docker-entrypoint-initdb.d:ro
     ports:
       - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME} -d postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
 
   pgadmin:
     image: dpage/pgadmin4:latest
@@ -103,6 +110,25 @@ services:
       - ./storage:/app/storage
     working_dir: /app
     command: bash -lc "pip install -e .[sqlalchemy] .[testing] && pytest -q"
+
+  app-db-init:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: datapub-app-db-init
+    depends_on:
+      postgres:
+        condition: service_healthy
+    env_file:
+      - .env
+    environment:
+      APP_DATABASE_URL: postgresql+psycopg://cognee:cognee@postgres:5432/datapub_db
+    working_dir: /app
+    volumes:
+      - ./src:/app/src
+      - ./scripts:/app/scripts
+    command: bash -lc "./scripts/init_app_db.sh"
+    restart: "no"
 
   swagger-ui:
     image: swaggerapi/swagger-ui:latest

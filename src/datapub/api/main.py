@@ -14,6 +14,7 @@ from datapub.db.base import SessionLocal
 from datapub.db.models import Document, Orgao, State, Municipality, DocumentType
 from datapub.db.init_db import init_db as init_db_sync
 from datapub.etl.normalize import run_normalize
+from datapub.etl.ibge_localidades import run_sync_ibge
 
 # Local imports
 from datapub import cli as datapub_cli
@@ -204,6 +205,15 @@ async def etl_run(payload: ETLRequest, background: BackgroundTasks):
     return {"status": "scheduled", "entity": payload.entity}
 
 
+@app.post("/admin/sync-ibge")
+async def admin_sync_ibge(background: BackgroundTasks):
+    def _run():
+        run_sync_ibge()
+
+    background.add_task(executor.submit, _run)
+    return {"status": "scheduled", "task": "sync-ibge"}
+
+
 @app.get("/entities")
 async def entities():
     return {
@@ -287,7 +297,6 @@ async def run_processor(payload: TriggerProcessor, background: BackgroundTasks):
 
 @app.post("/rag/ingest")
 async def rag_ingest(body: IngestBody, background: BackgroundTasks):
-    print(body); exit()
     entity_dir = Path("storage") / "processed" / body.entity
     if not entity_dir.exists():
         raise HTTPException(status_code=404, detail=f"Entidade sem diretório processado: {body.entity}")
@@ -303,17 +312,23 @@ async def rag_ingest(body: IngestBody, background: BackgroundTasks):
     else:
         raise HTTPException(status_code=400, detail="Informe 'file' ou 'all=true'")
 
-    async def _ingest_all():
+    async def _ingest_all_async():
         for f in to_ingest:
             await run_ingest(body.entity, f)
 
-    background.add_task(asyncio.create_task, _ingest_all())
+    def _runner():
+        asyncio.run(_ingest_all_async())
+
+    background.add_task(_runner)
     return {"status": "scheduled", "count": len(to_ingest)}
 
 
 @app.post("/rag/prune")
 async def rag_prune(background: BackgroundTasks):
-    background.add_task(asyncio.create_task, run_prune())
+    def _runner():
+        asyncio.run(run_prune())
+
+    background.add_task(_runner)
     return {"status": "scheduled", "task": "prune"}
 # --------- API Key Auth (optional) ---------
 EXEMPT_PATHS = {"/health", "/metrics", "/docs", "/openapi.json"}
@@ -343,3 +358,71 @@ async def api_key_middleware(request: Request, call_next):
         return Response(status_code=401)
 
     return await call_next(request)
+class StateOut(BaseModel):
+    id: int
+    nome: str
+    uf: str
+    ibge_id: Optional[int]
+
+
+class MunicipalityOut(BaseModel):
+    id: int
+    nome: str
+    uf: str
+    estado_nome: str
+    ibge_id: Optional[int]
+
+@app.get("/estados", response_model=List[StateOut])
+async def list_states(order: Optional[str] = "nome", order_dir: Optional[str] = "asc", db=Depends(get_db)):
+    # Choose base column
+    if order == "ibge_id":
+        col = State.ibge_id
+    elif order == "uf":
+        col = State.uf
+    else:
+        col = State.name
+    # Direction
+    if (order_dir or "asc").lower() == "desc":
+        ob = col.desc()
+    else:
+        ob = col.asc()
+    rows = db.query(State).order_by(ob, State.id.asc()).all()
+    return [
+        StateOut(id=r.id, nome=r.name, uf=r.uf, ibge_id=r.ibge_id) for r in rows
+    ]
+
+
+@app.get("/municipios", response_model=List[MunicipalityOut])
+async def list_municipios(
+    uf: Optional[str] = None,
+    q: Optional[str] = None,
+    order: Optional[str] = "nome",
+    order_dir: Optional[str] = "asc",
+    limit: int = 100,
+    offset: int = 0,
+    db=Depends(get_db),
+):
+    query = db.query(Municipality, State).join(State, Municipality.state_id == State.id)
+    if uf:
+        query = query.filter(State.uf == uf.upper())
+    if q:
+        query = query.filter(Municipality.name.ilike(f"%{q}%"))
+    if order == "ibge_id":
+        col = Municipality.ibge_id
+    else:
+        col = Municipality.name
+    if (order_dir or "asc").lower() == "desc":
+        ob = col.desc()
+    else:
+        ob = col.asc()
+    rows = query.order_by(ob, Municipality.id.asc()).limit(limit).offset(offset).all()
+    return [
+        MunicipalityOut(
+            id=m.id,
+            nome=m.name,
+            uf=s.uf,
+            estado_nome=s.name,
+            ibge_id=m.ibge_id,
+        )
+        for m, s in rows
+    ]

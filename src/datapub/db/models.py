@@ -10,6 +10,7 @@ class State(Base):
     id = Column(Integer, primary_key=True)
     name = Column(String(100), nullable=False, unique=True)
     uf = Column(String(2), nullable=False, unique=True)
+    ibge_id = Column(Integer, unique=True, nullable=True)
 
     municipalities = relationship("Municipality", back_populates="state")
     orgaos = relationship("Orgao", back_populates="state")
@@ -20,6 +21,7 @@ class Municipality(Base):
     id = Column(Integer, primary_key=True)
     name = Column(String(150), nullable=False)
     state_id = Column(Integer, ForeignKey("states.id"), nullable=False)
+    ibge_id = Column(Integer, unique=True, nullable=True)
 
     state = relationship("State", back_populates="municipalities")
     orgaos = relationship("Orgao", back_populates="municipality")
@@ -64,4 +66,3 @@ class Document(Base):
     document_type = relationship("DocumentType", back_populates="documents")
     state = relationship("State")
     municipality = relationship("Municipality")
-

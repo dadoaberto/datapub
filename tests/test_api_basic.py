@@ -94,7 +94,7 @@ def test_rag_ingest_all_and_file(client, monkeypatch, tmp_path):
     (storage / "file1.txt").write_text("a")
     (storage / "file2.txt").write_text("b")
 
-    # Prevent actually creating asyncio tasks
+    # Prevent actually running asyncio loop
     created = {"count": 0}
 
     async def fake_run_ingest(entity, file):
@@ -102,13 +102,13 @@ def test_rag_ingest_all_and_file(client, monkeypatch, tmp_path):
 
     import datapub.api.main as api
 
-    def fake_create_task(coro):
+    def fake_run(coro):
         created["count"] += 1
         return None
 
     monkeypatch.chdir(tmp_path)
     monkeypatch.setattr(api, "run_ingest", fake_run_ingest)
-    monkeypatch.setattr(api.asyncio, "create_task", fake_create_task)
+    monkeypatch.setattr(api.asyncio, "run", fake_run)
 
     # all=true
     resp = client.post("/rag/ingest", json={"entity": "al_pa", "all": True})
@@ -128,13 +128,12 @@ def test_rag_prune_schedules(client, monkeypatch):
     async def fake_prune():
         return None
 
-    def fake_create_task(coro):
+    def fake_run(coro):
         return None
 
     monkeypatch.setattr(api, "run_prune", fake_prune)
-    monkeypatch.setattr(api.asyncio, "create_task", fake_create_task)
+    monkeypatch.setattr(api.asyncio, "run", fake_run)
 
     resp = client.post("/rag/prune")
     assert resp.status_code == 200
     assert resp.json()["status"] == "scheduled"
-
