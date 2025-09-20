@@ -9,6 +9,7 @@ from typing import Dict, List, Optional, AsyncGenerator
 
 import os
 from fastapi import BackgroundTasks, FastAPI, HTTPException, Response, Request, Depends
+from fastapi.responses import HTMLResponse
 from pydantic import BaseModel, Field
 from prometheus_client import Counter, Histogram, generate_latest, CONTENT_TYPE_LATEST
 from sqlalchemy import select
@@ -25,6 +26,7 @@ from datapub import cli as datapub_cli
 from datapub.rag.ingest import run_ingest
 from datapub.rag.prune import run_prune
 import cognee
+from datapub.api.homepage import HomePage
 
 
 app = FastAPI(title="DataPub API", version="0.1.0")
@@ -141,6 +143,211 @@ def _resolve_class(mapping: List[Dict[str, type]], tipo: str):
 async def health():
     return {"status": "ok"}
 
+
+@app.get("/health/config", tags=["Chat"], summary="Exibe configurações relevantes do chat")
+async def health_config():
+    # Resolve Cognee version safely
+    cognee_version = None
+    try:
+        try:
+            from importlib import metadata as importlib_metadata  # Python 3.8+
+        except Exception:  # pragma: no cover - unlikely
+            import importlib_metadata  # type: ignore
+        try:
+            cognee_version = importlib_metadata.version("cognee")
+        except Exception:
+            cognee_version = getattr(cognee, "__version__", None)
+    except Exception:
+        cognee_version = None
+
+    # Database info (non-destructive, best-effort)
+    from datapub.db.base import engine as db_engine
+    db_info = {
+        "url": None,
+        "dialect": None,
+        "server_version": None,
+        "alembic_current_revision": None,
+        "migrations": None,
+    }
+    try:
+        url_obj = db_engine.url
+        db_info["url"] = {
+            "drivername": url_obj.drivername,
+            "database": url_obj.database,
+            "username": bool(url_obj.username),
+            "host": url_obj.host,
+            "port": url_obj.port,
+        }
+        db_info["dialect"] = db_engine.dialect.name
+        with db_engine.connect() as conn:
+            try:
+                res = conn.execute("SELECT version_num FROM alembic_version")
+                row = res.first()
+                if row:
+                    db_info["alembic_current_revision"] = row[0]
+            except Exception:
+                db_info["alembic_current_revision"] = None
+            # server version (best effort)
+            try:
+                sv = getattr(conn.dialect, "server_version_info", None)
+                if sv:
+                    db_info["server_version"] = ".".join(str(x) for x in sv if x is not None)
+            except Exception:
+                pass
+    except Exception:
+        pass
+
+    # Migrations info from filesystem
+    try:
+        versions_dir = Path(__file__).resolve().parents[1] / "migrations" / "versions"
+        if versions_dir.exists():
+            files = sorted([p.name for p in versions_dir.glob("*.py") if p.is_file()])
+            latest_file = files[-1] if files else None
+            latest_revision = None
+            if latest_file:
+                try:
+                    src = (versions_dir / latest_file).read_text(encoding="utf-8", errors="ignore")
+                    import re as _re
+                    m = _re.search(r"^revision\s*=\s*['\"]([^'\"]+)['\"]", src, flags=_re.M)
+                    if m:
+                        latest_revision = m.group(1)
+                except Exception:
+                    latest_revision = None
+            current_rev = db_info.get("alembic_current_revision")
+            pending = None
+            if latest_revision:
+                pending = (current_rev != latest_revision)
+            db_info["migrations"] = {
+                "path": str(versions_dir),
+                "count": len(files),
+                "latest": latest_file,
+                "latest_revision": latest_revision,
+                "current_revision": current_rev,
+                "pending": pending,
+            }
+    except Exception:
+        pass
+
+    return {
+        "chat_history_limit": _get_int_env("CHAT_HISTORY_LIMIT", 10),
+        "chat_retention_messages": _get_int_env("CHAT_RETENTION_MESSAGES", 0),
+        "api_keys_configured": bool(_get_configured_api_keys()),
+        "api_version": app.version,
+        "cognee_version": cognee_version,
+        "db": db_info,
+        "neo4j_url": os.getenv("NEO4J_URL", None),
+    }
+
+
+@app.get("/health/db", tags=["Health"], summary="Ping de conexão ao banco da aplicação")
+async def health_db():
+    from datapub.db.base import engine as db_engine
+    info = {"ok": False, "dialect": db_engine.dialect.name, "error": None}
+    try:
+        with db_engine.connect() as conn:
+            try:
+                conn.execute("SELECT 1")
+            except Exception:
+                pass
+        info["ok"] = True
+    except Exception as e:
+        info["error"] = str(e)
+    return info
+
+
+@app.get("/scheduler/info", tags=["Scheduler"], summary="Exibe variáveis do agendador (compose)")
+async def scheduler_info():
+    return {
+        "cron_pipeline": os.getenv("CRON_PIPELINE", "0 3 * * *"),
+        "entities": os.getenv("ENTITIES", ""),
+        "start": os.getenv("START", None),
+        "end": os.getenv("END", None),
+    }
+
+
+@app.get("/health/neo4j", tags=["Health"], summary="Ping TCP ao serviço Neo4j (bolt)")
+async def health_neo4j():
+    import socket
+    from urllib.parse import urlparse
+
+    url = os.getenv("NEO4J_URL", "")
+    out = {"ok": False, "url": url or None, "host": None, "port": None, "error": None}
+    if not url:
+        out["error"] = "NEO4J_URL not configured"
+        return out
+    try:
+        p = urlparse(url)
+        host = p.hostname or "neo4j"
+        port = p.port or 7687
+        out["host"], out["port"] = host, port
+        with socket.create_connection((host, port), timeout=1.5):
+            out["ok"] = True
+    except Exception as e:
+        out["error"] = str(e)
+    return out
+
+
+@app.get("/health/swagger", tags=["Health"], summary="Ping TCP ao Swagger UI (container)")
+async def health_swagger():
+    import socket
+    host, port = "swagger-ui", 8080
+    out = {"ok": False, "host": host, "port": port, "error": None}
+    try:
+        with socket.create_connection((host, port), timeout=1.5):
+            out["ok"] = True
+    except Exception as e:
+        out["error"] = str(e)
+    return out
+
+
+@app.get("/health/prometheus", tags=["Health"], summary="Ping TCP ao Prometheus (container)")
+async def health_prometheus():
+    import socket
+    host, port = "prometheus", 9090
+    out = {"ok": False, "host": host, "port": port, "error": None}
+    try:
+        with socket.create_connection((host, port), timeout=1.5):
+            out["ok"] = True
+    except Exception as e:
+        out["error"] = str(e)
+    return out
+
+
+@app.get("/health/pgadmin", tags=["Health"], summary="Ping TCP ao pgAdmin (container)")
+async def health_pgadmin():
+    import socket
+    host, port = "pgadmin", 5050
+    out = {"ok": False, "host": host, "port": port, "error": None}
+    try:
+        with socket.create_connection((host, port), timeout=1.5):
+            out["ok"] = True
+    except Exception as e:
+        out["error"] = str(e)
+    return out
+
+
+@app.get("/", include_in_schema=False)
+async def landing() -> HTMLResponse:
+    # Delegado para a classe HomePage (mantém compatibilidade atual)
+    base = os.getenv("PUBLIC_BASE_URL", "http://localhost")
+    try:
+        from datapub.db.base import engine as _engine
+        _url = _engine.url
+        _dialect = _engine.dialect.name
+        _db_name = _url.database or ""
+        _host = _url.host or ""
+        _port = _url.port or ""
+        if _dialect.startswith("sqlite"):
+            db_target = _db_name or ":memory:"
+        else:
+            db_target = f"{_db_name} @ {_host}:{_port}".strip()
+        db_overview = {"dialect": _dialect, "target": db_target}
+    except Exception:
+        db_overview = {"dialect": "desconhecido", "target": "indisponível"}
+
+    neo4j_url = os.getenv("NEO4J_URL", None) or "não configurado"
+    html = HomePage.render(base, db_overview, neo4j_url)
+    return HTMLResponse(content=html, status_code=200)
 
 @app.get("/metrics")
 async def metrics() -> Response:
@@ -627,6 +834,8 @@ async def chat_query_session(session_id: int, body: ChatMessageIn, db=Depends(ge
     s.updated_at = datetime.utcnow()
     db.commit()
     db.refresh(s)
+    # Retention policy (optional)
+    _enforce_retention(db, s.id)
 
     return {
         "session_id": s.id,
@@ -638,7 +847,31 @@ async def chat_query_session(session_id: int, body: ChatMessageIn, db=Depends(ge
     }
 
 
-@app.post("/chat/sessions/{session_id}/stream", tags=["Chat"], summary="Pergunta com resposta em streaming (SSE)")
+@app.post(
+    "/chat/sessions/{session_id}/stream",
+    tags=["Chat"],
+    summary="Pergunta com resposta em streaming (SSE)",
+    responses={
+        200: {
+            "content": {
+                "text/event-stream": {
+                    "examples": {
+                        "sse": {
+                            "summary": "Fluxo SSE",
+                            "value": """
+data: {\"type\": \"start\", \"session_id\": 1, \"filters\": [\"entidade:al_pa\"], \"history_used\": 10}
+
+data: {\"type\": \"chunk\", \"content\": \"1. Doc 1 — http://x/1\"}
+
+data: {\"type\": \"end\"}
+""",
+                        }
+                    }
+                }
+            }
+        }
+    },
+)
 async def chat_stream_session(session_id: int, body: ChatMessageIn, db=Depends(get_db)):
     s = db.query(ChatSession).get(session_id)
     if not s:
@@ -677,6 +910,8 @@ async def chat_stream_session(session_id: int, body: ChatMessageIn, db=Depends(g
     db.add(asst_msg)
     s.updated_at = datetime.utcnow()
     db.commit()
+    # Retention policy
+    _enforce_retention(db, s.id)
 
     async def event_gen() -> AsyncGenerator[bytes, None]:
         # Basic SSE stream with prelude, chunks, and end
@@ -887,7 +1122,7 @@ async def rag_prune(background: BackgroundTasks):
     background.add_task(_runner)
     return {"status": "scheduled", "task": "prune"}
 # --------- API Key Auth (optional) ---------
-EXEMPT_PATHS = {"/health", "/metrics", "/docs", "/openapi.json"}
+EXEMPT_PATHS = {"/", "/health", "/metrics", "/docs", "/openapi.json", "/favicon.ico"}
 
 
 def _get_configured_api_keys() -> set[str]:
@@ -1224,3 +1459,32 @@ async def _cognee_search(query_text: str, context: Optional[Dict] = None, metada
     except TypeError:
         # Older cognee versions may not support extra kwargs
         return await cognee.search(query_text=query_text)
+
+
+def _get_int_env(name: str, default: int) -> int:
+    try:
+        return int(os.getenv(name, str(default)))
+    except Exception:
+        return default
+
+
+def _enforce_retention(db, session_id: int) -> None:
+    max_msgs = _get_int_env("CHAT_RETENTION_MESSAGES", 0)
+    if max_msgs and max_msgs > 0:
+        q = db.query(ChatMessage).filter(ChatMessage.session_id == session_id)
+        total = q.count()
+        if total > max_msgs:
+            to_delete = total - max_msgs
+            ids = [
+                m.id
+                for m in (
+                    db.query(ChatMessage)
+                    .filter(ChatMessage.session_id == session_id)
+                    .order_by(ChatMessage.created_at.asc(), ChatMessage.id.asc())
+                    .limit(to_delete)
+                    .all()
+                )
+            ]
+            if ids:
+                db.query(ChatMessage).filter(ChatMessage.id.in_(ids)).delete(synchronize_session=False)
+                db.commit()

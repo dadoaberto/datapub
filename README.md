@@ -362,6 +362,16 @@ curl -N -X POST http://localhost:8000/chat/sessions/<ID>/stream \
   -d '{"query":"licitações saúde","history_limit":10}'
 ```
 
+  - Estrutura dos eventos SSE:
+
+```
+data: {"type": "start", "session_id": 1, "filters": ["entidade:al_pa", "estado:PA"], "history_used": 10}
+
+data: {"type": "chunk", "content": "1. Doc 1 — http://x/1"}
+
+data: {"type": "end"}
+```
+
   - Listar/limpar/apagar:
 
 ```
@@ -380,7 +390,14 @@ Integração com Cognee (contexto)
 - Para versões do Cognee sem suporte a `context`/`metadata`, a API concatena os filtros e trechos do histórico ao `query_text` como fallback.
 
 Configuração
-- `CHAT_HISTORY_LIMIT` (opcional): padrão de quantas mensagens recentes incluir no contexto (default: 10).
+  - `CHAT_HISTORY_LIMIT` (opcional): padrão de quantas mensagens recentes incluir no contexto (default: 10).
+- `CHAT_RETENTION_MESSAGES` (opcional): limita o número total de mensagens armazenadas por sessão; mensagens mais antigas são removidas após cada resposta (default: ilimitado).
+
+Landing page (links úteis)
+- Acesse `http://localhost:8000/` para uma página com links rápidos para:
+  - `/docs`, `/openapi.json`, `/metrics`, `/health`, `/health/config`
+  - Swagger UI (container externo em 8080), pgAdmin (5050), Neo4j Browser (7474), Prometheus (9090), Grafana (3000)
+- Ajuste `PUBLIC_BASE_URL` no `.env` para mudar o host base (default: `http://localhost`).
 
 - Reset do banco do Cognee (caso haja erro de schema após atualizar versão)
 

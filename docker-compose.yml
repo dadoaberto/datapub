@@ -20,6 +20,10 @@ services:
       DATABASE_URL: postgresql://cognee:cognee@postgres:5432/cognee_db
       APP_DATABASE_URL: postgresql+psycopg://cognee:cognee@postgres:5432/datapub_db
       NEO4J_URL: bolt://neo4j:7687
+      # Chat/landing configuration
+      PUBLIC_BASE_URL: ${PUBLIC_BASE_URL:-http://localhost}
+      CHAT_HISTORY_LIMIT: ${CHAT_HISTORY_LIMIT:-10}
+      CHAT_RETENTION_MESSAGES: ${CHAT_RETENTION_MESSAGES:-0}
     ports:
       - "8000:8000"
 
@@ -87,6 +91,9 @@ services:
       CRON_PIPELINE: "0 3 * * *"  # 03:00 UTC diariamente
       ENTITIES: "al_pa,al_go"      # execute para estas entidades (opcional)
       START: "2021-01-01"         # padrão global; pode usar <ENTITY>_START
+      PUBLIC_BASE_URL: ${PUBLIC_BASE_URL:-http://localhost}
+      CHAT_HISTORY_LIMIT: ${CHAT_HISTORY_LIMIT:-10}
+      CHAT_RETENTION_MESSAGES: ${CHAT_RETENTION_MESSAGES:-0}
     volumes:
       - ./src:/app/src
       - ./storage:/app/storage
@@ -95,22 +102,22 @@ services:
       - "9100:9100"  # Prometheus metrics
     command: python -m datapub.scheduler
 
-  tests:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    container_name: datapub-tests
-    depends_on:
-      - postgres
-      - neo4j
-    env_file:
-      - .env
-    volumes:
-      - ./src:/app/src
-      - ./tests:/app/tests
-      - ./storage:/app/storage
-    working_dir: /app
-    command: bash -lc "pip install -e '.[sqlalchemy,testing]' && pytest -q"
+  # tests:
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile
+  #   container_name: datapub-tests
+  #   depends_on:
+  #     - postgres
+  #     - neo4j
+  #   env_file:
+  #     - .env
+  #   volumes:
+  #     - ./src:/app/src
+  #     - ./tests:/app/tests
+  #     - ./storage:/app/storage
+  #   working_dir: /app
+  #   command: bash -lc "pip install -e '.[sqlalchemy,testing]' && pytest -q"
 
   app-db-init:
     build:
@@ -124,6 +131,9 @@ services:
       - .env
     environment:
       APP_DATABASE_URL: postgresql+psycopg://cognee:cognee@postgres:5432/datapub_db
+      PUBLIC_BASE_URL: ${PUBLIC_BASE_URL:-http://localhost}
+      CHAT_HISTORY_LIMIT: ${CHAT_HISTORY_LIMIT:-10}
+      CHAT_RETENTION_MESSAGES: ${CHAT_RETENTION_MESSAGES:-0}
       SEED_IBGE: "true"  # dev: semeia estados/municípios após migrações
     working_dir: /app
     volumes:
@@ -159,7 +169,7 @@ services:
       - "8080:8080"
     environment:
       # Multiple API specs (dynamic from app and static exported file)
-      - URLS=[{"name":"datapub","url":"http://datapub:8000/openapi.json"},{"name":"datapub-static","url":"/openapi.json"}]
+      - URLS=[{"name":"datapub","url":"${PUBLIC_BASE_URL:-http://localhost}:8000/openapi.json"},{"name":"datapub-static","url":"/openapi.json"}]
     volumes:
       # Serve static exported spec at http://localhost:8080/openapi.json
       - ./openapi/openapi.json:/usr/share/nginx/html/openapi.json:ro

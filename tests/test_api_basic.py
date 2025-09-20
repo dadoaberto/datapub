@@ -9,6 +9,65 @@ def test_health(client):
     assert resp.json()["status"] == "ok"
 
 
+def test_health_config_endpoint(client, monkeypatch):
+    monkeypatch.setenv("CHAT_HISTORY_LIMIT", "7")
+    monkeypatch.setenv("CHAT_RETENTION_MESSAGES", "3")
+    resp = client.get("/health/config")
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["chat_history_limit"] == 7
+    assert data["chat_retention_messages"] == 3
+    assert data["api_keys_configured"] in (True, False)
+    # Version fields present
+    assert isinstance(data.get("api_version"), str)
+    cv = data.get("cognee_version")
+    assert (cv is None) or isinstance(cv, str)
+    # DB info present with expected keys and migration info
+    db = data.get("db")
+    assert isinstance(db, dict)
+    assert set(["url", "dialect", "server_version", "alembic_current_revision", "migrations"]).issubset(db.keys())
+    mig = db.get("migrations")
+    assert isinstance(mig, dict)
+    assert set(["path", "count", "latest", "latest_revision", "current_revision", "pending"]).issubset(mig.keys())
+    # Neo4j URL can be None in tests
+    assert "neo4j_url" in data
+
+
+def test_landing_page(client):
+    r = client.get("/")
+    assert r.status_code == 200
+    assert "DataPub - Serviços" in r.text
+    assert 'data-theme-toggle' in r.text
+    # placeholders for dynamic status
+    assert 'id="api-version"' in r.text
+    assert 'id="cognee-version"' in r.text
+    assert 'id="db-migrations"' in r.text
+    # overview cards
+    assert 'Banco de Dados (APP)' in r.text
+    assert 'Neo4j' in r.text
+    assert 'Scheduler' in r.text
+    assert '/scheduler/info' in r.text
+
+
+def test_health_db_endpoint(client):
+    r = client.get('/health/db')
+    assert r.status_code == 200
+    data = r.json()
+    assert 'ok' in data and 'dialect' in data
+
+
+def test_health_neo4j_endpoint(client, monkeypatch):
+    # Ensure predictable result by unsetting NEO4J_URL
+    monkeypatch.delenv('NEO4J_URL', raising=False)
+    r = client.get('/health/neo4j')
+    assert r.status_code == 200
+    data = r.json()
+    assert 'ok' in data and 'url' in data and 'error' in data
+    # quick action links present
+    assert 'Abrir pgAdmin' in r.text
+    assert 'Abrir Neo4j Browser' in r.text
+
+
 def test_entities(client):
     resp = client.get("/entities")
     assert resp.status_code == 200

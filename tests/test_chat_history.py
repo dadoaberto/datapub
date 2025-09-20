@@ -90,3 +90,85 @@ def test_chat_stream_sse(client, monkeypatch):
     assert "data: {\"type\": \"start\"" in body
     assert "data: {\"type\": \"chunk\"" in body
     assert "data: {\"type\": \"end\"}" in body
+
+
+def test_patch_filters_affect_context(client, monkeypatch):
+    calls = []
+
+    async def fake_search(query_text: str, **kwargs):
+        calls.append({"query_text": query_text, "kwargs": kwargs})
+        return [{"title": "Doc X"}]
+
+    import datapub.api.main as api
+    monkeypatch.setattr(api, "cognee", type("X", (), {"search": fake_search}))
+
+    # Create empty session
+    sid = client.post("/chat/sessions", json={}).json()["id"]
+
+    # Patch filters
+    r = client.patch(
+        f"/chat/sessions/{sid}",
+        json={"entity": "al_pa", "estado": "PA", "municipio": "Belém", "orgao": "ALEPA"},
+    )
+    assert r.status_code == 200
+
+    # Query and validate context/metadata forwarding
+    q = client.post(f"/chat/sessions/{sid}/query", json={"query": "q", "history_limit": 0})
+    assert q.status_code == 200
+    assert len(calls) == 1
+    ctx = calls[0]["kwargs"].get("context") or {}
+    meta = calls[0]["kwargs"].get("metadata") or {}
+    assert "entidade:al_pa" in ctx.get("filters", [])
+    assert "estado:PA" in ctx.get("filters", [])
+    assert meta.get("entity") == "al_pa"
+    assert meta.get("estado") == "PA"
+
+
+def test_chat_history_limit_context(client, monkeypatch):
+    calls = []
+
+    async def fake_search(query_text: str, **kwargs):
+        calls.append({"query_text": query_text, "kwargs": kwargs})
+        return [{"title": "Doc"}]
+
+    import datapub.api.main as api
+    monkeypatch.setattr(api, "cognee", type("X", (), {"search": fake_search}))
+
+    sid = client.post("/chat/sessions", json={}).json()["id"]
+
+    # First message, no history used
+    r1 = client.post(f"/chat/sessions/{sid}/query", json={"query": "primeira", "history_limit": 0})
+    assert r1.status_code == 200
+
+    # Second message, request history
+    r2 = client.post(f"/chat/sessions/{sid}/query", json={"query": "segunda", "history_limit": 2})
+    assert r2.status_code == 200
+    assert len(calls) == 2
+
+    ctx2 = calls[1]["kwargs"].get("context") or {}
+    hist = ctx2.get("history") or []
+    # Should include at least the previous assistant reply
+    assert len(hist) >= 1
+    roles = {h.get("role") for h in hist}
+    assert "assistant" in roles or "user" in roles
+
+
+def test_retention_policy_enforced(client, monkeypatch):
+    # Limit total messages stored per session
+    monkeypatch.setenv("CHAT_RETENTION_MESSAGES", "3")
+
+    async def fake_search(query_text: str, **kwargs):
+        return [{"title": "Doc"}]
+
+    import datapub.api.main as api
+    monkeypatch.setattr(api, "cognee", type("X", (), {"search": fake_search}))
+
+    sid = client.post("/chat/sessions", json={}).json()["id"]
+
+    # First query -> 2 messages
+    client.post(f"/chat/sessions/{sid}/query", json={"query": "q1", "history_limit": 0})
+    # Second query -> 4 messages (but retention=3 should prune 1)
+    client.post(f"/chat/sessions/{sid}/query", json={"query": "q2", "history_limit": 0})
+
+    msgs = client.get(f"/chat/sessions/{sid}/messages").json()
+    assert len(msgs) <= 3
