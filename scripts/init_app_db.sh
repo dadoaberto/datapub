@@ -30,8 +30,23 @@ try:
             cur.execute("SELECT 1 FROM pg_database WHERE datname = %s", (dbname,))
             exists = cur.fetchone() is not None
             if not exists:
-                cur.execute(f"CREATE DATABASE \"{dbname}\" OWNER \"{user}\"")
-                print(f"[init_app_db] Created database {dbname}")
+                try:
+                    cur.execute(f"CREATE DATABASE \"{dbname}\" OWNER \"{user}\"")
+                    print(f"[init_app_db] Created database {dbname}")
+                except Exception as e:
+                    # Handle collation version mismatch by refreshing template DBs and retry
+                    msg = str(e)
+                    print(f"[init_app_db] CREATE DATABASE failed: {msg}. Attempting REFRESH COLLATION VERSION on templates...")
+                    try:
+                        cur.execute("ALTER DATABASE template1 REFRESH COLLATION VERSION")
+                    except Exception as e2:
+                        print(f"[init_app_db] template1 refresh failed: {e2}")
+                    try:
+                        cur.execute("ALTER DATABASE template0 REFRESH COLLATION VERSION")
+                    except Exception as e3:
+                        print(f"[init_app_db] template0 refresh failed: {e3}")
+                    cur.execute(f"CREATE DATABASE \"{dbname}\" OWNER \"{user}\"")
+                    print(f"[init_app_db] Created database {dbname} after refreshing collations")
             else:
                 print(f"[init_app_db] Database {dbname} already exists")
 except Exception as e:
@@ -41,3 +56,12 @@ PY
 
 alembic upgrade head
 echo "[init_app_db] Migration complete."
+
+if [[ "${SEED_IBGE:-false}" == "true" ]]; then
+  echo "[init_app_db] Seeding IBGE states/municipalities..."
+  python - << 'PY'
+from datapub.etl.ibge_localidades import run_sync_ibge
+res = run_sync_ibge()
+print(f"Seed result: {res}")
+PY
+fi

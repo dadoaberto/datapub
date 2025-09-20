@@ -5,11 +5,11 @@ import hashlib
 import argparse
 from pathlib import Path
 from datetime import datetime
-from cognee.api.v1.visualize.visualize import visualize_graph
 import shutil
 
 async def run_ingest(entity: str, file: str):
     try:
+        print(f"[INFO] Ingestando arquivo: {file}") 
         file_path = Path("storage") / "processed" / entity / file
         meta_dir = Path("storage") / "processed" / entity / "metadata"
         meta_dir.mkdir(parents=True, exist_ok=True)
@@ -34,8 +34,13 @@ async def run_ingest(entity: str, file: str):
         # for result in results:
         #     print(result)
         
-        print("📈 Generating visualization...")
-        await visualize_graph()
+        # Visualization is optional and depends on Cognee extras; try best-effort
+        try:
+            from cognee.api.v1.visualize.visualize import visualize_graph  # type: ignore
+            print("📈 Generating visualization...")
+            await visualize_graph()
+        except Exception:
+            print("[WARN] Visualization not available; skipping.")
 
         html_file = Path("~/graph_visualization.html").expanduser()
         destination = structured_path / (file + ".html")

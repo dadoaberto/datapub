@@ -105,8 +105,16 @@ Depois acesse o menu no Swagger UI e selecione “datapub-static”.
 - Rodar ETL (normalização): `POST /etl/run` body `{ "entity": "al_pa" }` (opcional)
 - Geo (filtros):
   - `GET /estados`
-  - `GET /estados?order=nome|ibge_id|uf&order_dir=asc|desc`
-  - `GET /municipios?uf=PA&q=Bel&order=nome|ibge_id&order_dir=asc|desc` (autocomplete/filtragem)
+  - `GET /estados?order=nome|ibge_id|uf&order_dir=asc|desc&regiao_sigla=N&regiao_nome=Norte`
+  - `GET /municipios?uf=PA&q=Bel&order=nome|ibge_id&order_dir=asc|desc&limit=50&offset=0` (autocomplete)
+  - `GET /orgaos?uf=PA&municipio=Bel%C3%A9m&tipo=municipal&q=Prefeitura&limit=50&offset=0`
+  - Filtros adicionais em estados: `regiao_sigla`, `regiao_nome` (ex.: `GET /estados?regiao_sigla=N`)
+  - Lookups por IBGE: `GET /estados/{ibge_id}`, `GET /municipios/{ibge_id}`
+
+- Paginação
+  - Endpoints de listagem retornam cabeçalhos:
+    - `X-Total-Count`: total de registros no filtro
+    - `Link`: links de paginação (`first`, `last`, `next`, `prev`)
 
 10) Autenticação (API Key)
 
@@ -144,9 +152,13 @@ docker-compose run --rm datapub etl
 ```
 docker-compose run --rm datapub etl-ibge
 # ou via API: POST /admin/sync-ibge
+# ou serviço one-shot dedicado
+docker-compose run --rm app-db-seed-geo
 ```
 
 - O ETL IBGE preenche `ibge_id` em `states` e `municipalities`, que podem ser usados em integrações futuras.
+  - Estados agora possuem também `regiao_nome` e `regiao_sigla` sincronizados do IBGE.
+  - Em dev, o serviço `app-db-init` já vem com `SEED_IBGE=true` para semear automaticamente após migrações.
 
 - Buscar documentos pela API:
   - `GET /documents?estado=PA&orgao=Assembleia&tipo=Diário&q=saúde&limit=20`
@@ -225,6 +237,128 @@ GET http://localhost:8000/documents?estado=PA&orgao=Assembleia&tipo=Di%C3%A1rio&
 
 - (Opcional) Proteger a API com API Key: adicione `API_KEYS` ao `.env` e envie a chave em `X-API-Key` ou `Authorization: Bearer <chave>`.
 
+11) Operações do Pipeline (Extract, Process, Ingest, Prune)
+
+- Listar entidades e tipos suportados (API):
+
+```
+curl http://localhost:8000/entities
+```
+
+- Extract (coleta de arquivos brutos)
+  - Via CLI (Docker Compose):
+
+```
+docker-compose run --rm datapub datapub al_pa_extractor diario --start 2021-01-01 --end 2021-01-08
+docker-compose run --rm datapub datapub al_go_extractor diario --start 2007-08-01 --end 2007-08-31
+```
+
+  - Via API:
+
+```
+curl -X POST http://localhost:8000/extractor/run \
+  -H 'Content-Type: application/json' \
+  -d '{
+        "entity": "al_pa",
+        "tipo": "diario",
+        "start": "2021-01-01",
+        "end": "2021-01-08",
+        "headless": true
+      }'
+```
+
+- Process (extração de texto / OCR)
+  - Via CLI:
+
+```
+docker-compose run --rm datapub datapub al_pa_processor diario --start 2021-01-01 --end 2021-01-08
+```
+
+  - Via API:
+
+```
+curl -X POST http://localhost:8000/processor/run \
+  -H 'Content-Type: application/json' \
+  -d '{
+        "entity": "al_pa",
+        "tipo": "diario",
+        "start": "2021-01-01",
+        "end": "2021-01-08"
+      }'
+```
+
+- Ingest (RAG/Cognee)
+  - Um arquivo específico (CLI):
+
+```
+docker-compose run --rm datapub ingest --entity=al_pa --file=diario-al_pa-2021-01-01_2021-01-08.txt
+```
+
+  - Todos os arquivos processados de uma entidade (API):
+
+```
+curl -X POST http://localhost:8000/rag/ingest \
+  -H 'Content-Type: application/json' \
+  -d '{"entity":"al_pa","all":true}'
+```
+
+  - Loop (CLI) para ingerir todos (opcional):
+
+```
+docker-compose run --rm datapub bash -lc 'for f in storage/processed/al_pa/*.txt; do ingest --entity=al_pa --file="$(basename "$f")"; done'
+```
+
+- Prune (limpeza do Cognee)
+  - CLI:
+
+```
+docker-compose run --rm datapub prune
+```
+
+  - API:
+
+```
+curl -X POST http://localhost:8000/rag/prune
+```
+
+- Busca (Cognee)
+  - CLI:
+
+```
+docker-compose run --rm datapub query --query 'nomeações em 2021'
+```
+
+  - API (Chat Search):
+
+```
+curl -X POST http://localhost:8000/chat/search \
+  -H 'Content-Type: application/json' \
+  -d '{"query":"licitações saúde","entity":"al_pa","estado":"PA"}'
+```
+
+- Reset do banco do Cognee (caso haja erro de schema após atualizar versão)
+
+```
+# Apaga e recria o banco cognee_db, e garante a extensão pgvector
+docker-compose run --rm datapub bash -lc ./scripts/reset_cognee_db.sh
+
+# Em seguida, rode novamente a ingestão / prune conforme necessário
+```
+
+- Dicas dinâmicas (geradas pela própria API):
+
+```
+curl http://localhost:8000/help/commands | jq
+# Retorna exemplos dinâmicos (CLI/API) de extract/process/ingest baseados nas entidades/tipos registrados no datapub.cli
+```
+
+- Parâmetros e defaults inferidos (por entidade/tipo):
+
+```
+curl http://localhost:8000/help/parameters | jq
+# Mostra os args aceitos (ex.: --start, --end) e, quando possível, a data inicial padrão inferida do código
+```
+
 4) Cronjobs (scheduler)
 
 - Um único job agenda a pipeline completa (todas as entidades selecionadas) diariamente às 03:00 UTC.
@@ -297,7 +431,7 @@ docker-compose run --rm datapub python scripts/export_openapi.py
 ```
 python -m venv .venv
 source .venv/bin/activate
-pip install -e .[sqlalchemy]
+pip install -e '.[sqlalchemy,testing]'
 ```
 
 2) Iniciar API

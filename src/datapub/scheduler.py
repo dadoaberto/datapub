@@ -110,7 +110,21 @@ _LOGGER = logging.getLogger("datapub.scheduler")
 
 def _setup_logging():
     level = env("LOG_LEVEL", "INFO").upper()
+    # This sets up the console handler on the root logger
     logging.basicConfig(level=level, format="%(message)s")
+
+    # Now, add a file handler for errors to the root logger
+    root_logger = logging.getLogger()
+    
+    log_dir = "/app/logs"
+    os.makedirs(log_dir, exist_ok=True)
+    log_file = os.path.join(log_dir, "datapub_errors.log")
+
+    error_file_handler = logging.FileHandler(log_file)
+    error_file_handler.setLevel(logging.ERROR)
+    file_formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+    error_file_handler.setFormatter(file_formatter)
+    root_logger.addHandler(error_file_handler)
 
 
 def jlog(level: str, event: str, **fields):

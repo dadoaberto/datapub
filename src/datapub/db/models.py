@@ -11,6 +11,8 @@ class State(Base):
     name = Column(String(100), nullable=False, unique=True)
     uf = Column(String(2), nullable=False, unique=True)
     ibge_id = Column(Integer, unique=True, nullable=True)
+    region_name = Column(String(50), nullable=True)
+    region_code = Column(String(2), nullable=True)
 
     municipalities = relationship("Municipality", back_populates="state")
     orgaos = relationship("Orgao", back_populates="state")

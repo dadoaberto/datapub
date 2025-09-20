@@ -22,9 +22,12 @@ def _extract_state_info(item: Dict) -> Optional[Dict]:
     uf = item.get("sigla")
     nome = item.get("nome")
     ibge_id = item.get("id")
+    regiao = item.get("regiao") or {}
+    regiao_nome = regiao.get("nome")
+    regiao_sigla = regiao.get("sigla")
     if not uf or not nome:
         return None
-    return {"uf": uf, "nome": nome, "ibge_id": ibge_id}
+    return {"uf": uf, "nome": nome, "ibge_id": ibge_id, "regiao_nome": regiao_nome, "regiao_sigla": regiao_sigla}
 
 
 def _extract_municipio_state_sigla(item: Dict) -> Optional[str]:
@@ -59,6 +62,8 @@ def sync_states() -> int:
             uf = info["uf"].upper()
             nome = info["nome"]
             ibge_id = info.get("ibge_id")
+            regiao_nome = info.get("regiao_nome")
+            regiao_sigla = info.get("regiao_sigla")
             existing = s.execute(select(State).where(State.uf == uf)).scalar_one_or_none()
             if existing:
                 # Update name if changed
@@ -66,8 +71,12 @@ def sync_states() -> int:
                     existing.name = nome
                 if ibge_id and existing.ibge_id != ibge_id:
                     existing.ibge_id = ibge_id
+                if regiao_nome and existing.region_name != regiao_nome:
+                    existing.region_name = regiao_nome
+                if regiao_sigla and existing.region_code != regiao_sigla:
+                    existing.region_code = regiao_sigla
             else:
-                s.add(State(name=nome, uf=uf, ibge_id=ibge_id))
+                s.add(State(name=nome, uf=uf, ibge_id=ibge_id, region_name=regiao_nome, region_code=regiao_sigla))
                 count += 1
     return count
 

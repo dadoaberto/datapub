@@ -90,6 +90,7 @@ services:
     volumes:
       - ./src:/app/src
       - ./storage:/app/storage
+      - ./logs:/app/logs
     ports:
       - "9100:9100"  # Prometheus metrics
     command: python -m datapub.scheduler
@@ -109,7 +110,7 @@ services:
       - ./tests:/app/tests
       - ./storage:/app/storage
     working_dir: /app
-    command: bash -lc "pip install -e .[sqlalchemy] .[testing] && pytest -q"
+    command: bash -lc "pip install -e '.[sqlalchemy,testing]' && pytest -q"
 
   app-db-init:
     build:
@@ -123,11 +124,30 @@ services:
       - .env
     environment:
       APP_DATABASE_URL: postgresql+psycopg://cognee:cognee@postgres:5432/datapub_db
+      SEED_IBGE: "true"  # dev: semeia estados/municípios após migrações
     working_dir: /app
     volumes:
       - ./src:/app/src
       - ./scripts:/app/scripts
     command: bash -lc "./scripts/init_app_db.sh"
+    restart: "no"
+
+  app-db-seed-geo:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: datapub-app-db-seed-geo
+    depends_on:
+      postgres:
+        condition: service_healthy
+    env_file:
+      - .env
+    environment:
+      APP_DATABASE_URL: postgresql+psycopg://cognee:cognee@postgres:5432/datapub_db
+    working_dir: /app
+    volumes:
+      - ./src:/app/src
+    command: bash -lc "etl-ibge"
     restart: "no"
 
   swagger-ui:
