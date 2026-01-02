@@ -170,6 +170,8 @@ services:
     environment:
       # Multiple API specs (dynamic from app and static exported file)
       - URLS=[{"name":"datapub","url":"${PUBLIC_BASE_URL:-http://localhost}:8000/openapi.json"},{"name":"datapub-static","url":"/openapi.json"}]
+      # Prefer the static spec by default to avoid CORS until API allows it
+      - URLS_PRIMARY_NAME=datapub-static
     volumes:
       # Serve static exported spec at http://localhost:8080/openapi.json
       - ./openapi/openapi.json:/usr/share/nginx/html/openapi.json:ro

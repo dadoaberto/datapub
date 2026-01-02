@@ -10,6 +10,7 @@ from typing import Dict, List, Optional, AsyncGenerator
 import os
 from fastapi import BackgroundTasks, FastAPI, HTTPException, Response, Request, Depends
 from fastapi.responses import HTMLResponse
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 from prometheus_client import Counter, Histogram, generate_latest, CONTENT_TYPE_LATEST
 from sqlalchemy import select
@@ -30,6 +31,19 @@ from datapub.api.homepage import HomePage
 
 
 app = FastAPI(title="DataPub API", version="0.1.0")
+
+# --------- CORS (for external Swagger UI and web clients) ---------
+# Allow origins can be configured via env var CORS_ALLOWED_ORIGINS
+# Default includes Swagger UI container on localhost:8080
+_cors_env = os.getenv("CORS_ALLOWED_ORIGINS", "http://localhost:8080,http://127.0.0.1:8080")
+_allowed_origins = [o.strip() for o in _cors_env.split(",") if o.strip()]
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=_allowed_origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 # --------- API Metrics ---------
@@ -1136,6 +1150,9 @@ def _get_configured_api_keys() -> set[str]:
 async def api_key_middleware(request: Request, call_next):
     # Enforce only if keys are configured
     allowed = _get_configured_api_keys()
+    # Always allow preflight requests to flow for CORS
+    if request.method == "OPTIONS":
+        return await call_next(request)
     if not allowed or request.url.path in EXEMPT_PATHS:
         return await call_next(request)
 
