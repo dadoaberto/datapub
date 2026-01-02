@@ -46,6 +46,30 @@ app.add_middleware(
 )
 
 
+@app.on_event("startup")
+async def startup_event():
+    # Initialize Cognee database
+    try:
+        # Explicitly call setup() as requested by the error
+        # Based on exploration, create_db_and_tables seems to be the one
+        from cognee.infrastructure.databases.relational import create_db_and_tables
+        await create_db_and_tables()
+        
+        from cognee.infrastructure.databases.vector import create_vector_engine
+        await create_vector_engine()
+
+        from cognee.infrastructure.databases.graph import get_graph_engine
+        await get_graph_engine()
+        
+        # Also run prune to be safe
+        await run_prune()
+    except Exception as e:
+        print(f"Warning: Cognee startup failed: {e}")
+        import traceback
+        traceback.print_exc()
+
+
+
 # --------- API Metrics ---------
 API_REQUESTS = Counter(
     "datapub_api_requests_total",
@@ -764,15 +788,20 @@ async def list_chat_messages(session_id: int, limit: int = 50, offset: int = 0, 
     ]
 
 
-def _format_results_as_text(results: List[Dict]) -> str:
+def _format_results_as_text(results: List[any]) -> str:
     lines: List[str] = []
     for i, r in enumerate(results[:5], start=1):
-        title = r.get("title") or r.get("titulo") or r.get("text") or r.get("content") or "resultado"
-        url = r.get("url") or r.get("link")
-        if url:
-            lines.append(f"{i}. {title} — {url}")
+        if isinstance(r, dict):
+            title = r.get("title") or r.get("titulo") or r.get("text") or r.get("content") or "resultado"
+            url = r.get("url") or r.get("link")
+            if url:
+                lines.append(f"{i}. {title} — {url}")
+            else:
+                lines.append(f"{i}. {title}")
         else:
-            lines.append(f"{i}. {title}")
+            # Handle string or other types
+            lines.append(f"{i}. {str(r)}")
+            
     if not lines:
         lines = ["Nenhum resultado encontrado."]
     return "\n".join(lines)

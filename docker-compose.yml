@@ -24,6 +24,8 @@ services:
       PUBLIC_BASE_URL: ${PUBLIC_BASE_URL:-http://localhost}
       CHAT_HISTORY_LIMIT: ${CHAT_HISTORY_LIMIT:-10}
       CHAT_RETENTION_MESSAGES: ${CHAT_RETENTION_MESSAGES:-0}
+      CORS_ALLOWED_ORIGINS: "http://localhost:8080,http://127.0.0.1:8080,http://localhost:8081,http://127.0.0.1:8081,http://localhost:5173,http://127.0.0.1:5173"
+      API_KEYS: ""
     ports:
       - "8000:8000"
 
