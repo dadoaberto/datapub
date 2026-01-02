@@ -1,0 +1,106 @@
+{
+  "id": null,
+  "uid": "datapub-overview",
+  "title": "DataPub Overview",
+  "tags": ["datapub"],
+  "timezone": "browser",
+  "schemaVersion": 36,
+  "version": 1,
+  "templating": {
+    "list": [
+      {
+        "name": "entity",
+        "type": "query",
+        "datasource": { "type": "prometheus", "uid": "Prometheus" },
+        "query": "label_values(datapub_entity_extract_seconds_bucket, entity)",
+        "includeAll": true,
+        "multi": true,
+        "refresh": 2,
+        "sort": 1,
+        "current": { "text": "All", "value": ["$__all"] }
+      }
+    ]
+  },
+  "panels": [
+    {
+      "type": "stat",
+      "title": "Last Pipeline Run",
+      "gridPos": {"x": 0, "y": 0, "w": 8, "h": 4},
+      "targets": [
+        {"expr": "datapub_pipeline_last_run_timestamp", "refId": "A"}
+      ]
+    },
+    {
+      "type": "graph",
+      "title": "API Request Rate",
+      "gridPos": {"x": 8, "y": 0, "w": 16, "h": 8},
+      "targets": [
+        {
+          "expr": "sum(rate(datapub_api_requests_total[5m]))",
+          "legendFormat": "req/s",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "type": "graph",
+      "title": "API Status Codes (top paths)",
+      "gridPos": {"x": 0, "y": 4, "w": 24, "h": 8},
+      "targets": [
+        {
+          "expr": "topk(5, sum(rate(datapub_api_requests_total[5m])) by (path, status_code))",
+          "legendFormat": "{{path}} {{status_code}}",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "type": "graph",
+      "title": "Extract Duration (by entity)",
+      "gridPos": {"x": 0, "y": 12, "w": 12, "h": 8},
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.9, sum(rate(datapub_entity_extract_seconds_bucket{entity=~\"$entity\"}[5m])) by (le, entity))",
+          "legendFormat": "extract p90 {{entity}}",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "type": "graph",
+      "title": "Process Duration (by entity)",
+      "gridPos": {"x": 12, "y": 12, "w": 12, "h": 8},
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.9, sum(rate(datapub_entity_process_seconds_bucket{entity=~\"$entity\"}[5m])) by (le, entity))",
+          "legendFormat": "process p90 {{entity}}",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "type": "graph",
+      "title": "Extract Errors (by entity)",
+      "gridPos": {"x": 0, "y": 20, "w": 12, "h": 8},
+      "targets": [
+        {
+          "expr": "sum(rate(datapub_entity_extract_errors_total{entity=~\"$entity\"}[5m])) by (entity)",
+          "legendFormat": "extract errors {{entity}}",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "type": "graph",
+      "title": "Process Errors (by entity)",
+      "gridPos": {"x": 12, "y": 20, "w": 12, "h": 8},
+      "targets": [
+        {
+          "expr": "sum(rate(datapub_entity_process_errors_total{entity=~\"$entity\"}[5m])) by (entity)",
+          "legendFormat": "process errors {{entity}}",
+          "refId": "A"
+        }
+      ]
+    }
+  ]
+}

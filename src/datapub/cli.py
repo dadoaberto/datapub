@@ -1,131 +1,83 @@
 #!/usr/bin/env python3
-"""
-CLI to run extractors for official government gazettes.
-Adapted for PyScaffold project structure.
-"""
 
 import argparse
-import importlib
 import sys
-from datetime import datetime, date
-from pathlib import Path
-from datapub.shared.contracts.extractor_contract import ExtractorContract
 from datapub.shared.utils.extractor_base import ExtractorBase
+from datapub.shared.utils.processor_base import ProcessorBase  
 
-EXTRACTORS_PACKAGE = "datapub.entities"
+# Extractors
+from datapub.entities.al_pa.extractors.diario_extractor import ALPAExtractor
+from datapub.entities.al_go.extractors.diario_extractor import ALGOExtractor
+from datapub.entities.al_ms.extractors.diario_extractor import ALMSExtractor
+from datapub.entities.al_ce.extractors.diario_extractor import ALCEExtractor
+from datapub.entities.al_ac.extractors.diario_extractor import ALACExtractor
 
-def parse_date(date_str):
-    """Parses a date string in YYYY-MM-DD format into a date object."""
-    return datetime.strptime(date_str, "%Y-%m-%d").date()
+# Processors
+from datapub.entities.al_pa.processors.diario_processor import ALPAProcessor 
 
-def load_extractor(entity: str) -> ExtractorContract:
-    """
-    Dynamically loads and returns the Extractor class instance for a given entity.
+extractors = {
+    "al_pa": [{"diario": ALPAExtractor}],
+    "al_go": [{"diario": ALGOExtractor}],
+    "al_ms": [{"diario": ALMSExtractor}],
+    "al_ce": [{"diario": ALCEExtractor}],
+    "al_ac": [{"diario": ALACExtractor}],
+}
 
-    Args:
-        entity (str): Name of the entity folder (e.g., 'al_go').
+processors = {
+    "al_pa": [{"diario": ALPAProcessor}],
+    # adicione outros processors conforme necessário
+}
 
-    Returns:
-        ExtractorContract: An instance of the extractor class.
+def build_parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(description="Run extractors or processors")
+    entity_subparsers = parser.add_subparsers(dest="entity", required=True)
 
-    Raises:
-        ValueError: If the extractor module or class cannot be found.
-        TypeError: If the loaded class does not inherit from ExtractorContract.
-    """
-    class_name = entity.upper().replace("_", "") + "Extractor"
+    for mode, collection in [("extractor", extractors), ("processor", processors)]:
+        for entity, class_dicts in collection.items():
+            entity_parser = entity_subparsers.add_parser(f"{entity}_{mode}", help=f"{mode.title()}s for {entity}")
+            type_subparsers = entity_parser.add_subparsers(dest="type", required=True)
 
-    try:
-        module = importlib.import_module(f"datapub.entities.{entity}.extractor")
-    except ModuleNotFoundError as e:
-        raise ValueError(f"Extractor module not found for entity '{entity}'") from e
+            for class_dict in class_dicts:
+                for name, cls in class_dict.items():
+                    expected_base = ExtractorBase if mode == "extractor" else ProcessorBase
+                    if not (isinstance(cls, type) and issubclass(cls, expected_base)):
+                        print(f"❌ Erro: {cls} not instance of {expected_base.__name__}")
+                        sys.exit(1)
 
-    if not hasattr(module, class_name):
-        raise AttributeError(f"The module '{entity}.extractor' must contain a class named '{class_name}'")
+                    type_parser = type_subparsers.add_parser(name, help=f"Tipo '{name}'")
+                    if not (hasattr(cls, "add_arguments") and callable(cls.add_arguments)):
+                        print(f"❌ Classe '{cls.__name__}' precisa implementar 'add_arguments(parser)'")
+                        sys.exit(1)
 
-    extractor_cls = getattr(module, class_name)
+                    cls.add_arguments(type_parser)
+                    type_parser.set_defaults(_class=cls, _mode=mode)
 
-    if not issubclass(extractor_cls, ExtractorContract):
-        raise TypeError(f"Extractor class in '{entity}' must inherit from ExtractorContract")
-
-    return extractor_cls()
-
-def run_extractor(entity, args):
-    """Initializes and runs the appropriate extractor with CLI arguments."""
-    extractor = load_extractor(entity)
-
-    params = {}
-
-    if entity == "al_go":
-        # ALE-GO extractor: uses start/end dates
-        params["start_date"] = parse_date(args.start) if args.start else date(2007, 8, 1)
-        params["end_date"] = parse_date(args.end) if args.end else date.today()
-        print(f"🚀 Starting ALE-GO download from {params['start_date']} to {params['end_date']}")
-    
-    elif entity == "al_ms":
-        # ALE-MS extractor: uses edition numbers
-        params["start_num"] = int(args.start) if args.start else 1844
-        params["end_num"] = int(args.end) if args.end else None
-        print(f"🚀 Starting ALE-MS download from number {params['start_num']} to {'last available' if not params['end_num'] else params['end_num']}")
-
-    elif entity == "al_pa":
-        # ALE-PA extractor: uses start/end dates
-        params["start_date"] = parse_date(args.start) if args.start else date(2021, 1, 1)
-        params["end_date"] = parse_date(args.end) if args.end else date.today()
-        print(f"🚀 Starting ALE-PA download from {params['start_date']} to {params['end_date']}")
-
-    elif entity == "al_ce":
-        # ALE-CE extractor: uses start/end dates
-        params["start_date"] = parse_date(args.start) if args.start else date(2025, 5, 26)
-        params["end_date"] = parse_date(args.end) if args.end else date.today()
-        print(f"🚀 Starting ALE-CE download from {params['start_date']} to {params['end_date']}")
-
-    elif entity == "al_ac":
-        # ALE-AC extractor: uses start/end dates
-        params["start_date"] = parse_date(args.start) if args.start else date(2015, 1, 1)
-        params["end_date"] = parse_date(args.end) if args.end else date.today()
-        print(f"🚀 Starting ALE-AC download from {params['start_date']} to {params['end_date']}")
-
-    # Call the extractor's download method with collected parameters
-    extractor.download(**params)
+    return parser
 
 def main():
-    """Entry point for CLI parsing and execution."""
-    parser = argparse.ArgumentParser(description="Runner for official gazette extractors")
-    subparsers = parser.add_subparsers(dest="entity", required=True)
-
-    # Define subcommands and their arguments for each 'entity'
-    parser_algo = subparsers.add_parser("al_go", help="ALE-GO gazettes")
-    parser_algo.add_argument("--start")
-    parser_algo.add_argument("--end")
-
-    parser_alms = subparsers.add_parser("al_ms", help="ALE-MS gazettes")
-    parser_alms.add_argument("--start")
-    parser_alms.add_argument("--end")
-
-    parser_alepa = subparsers.add_parser("al_pa", help="ALE-PA gazettes")
-    parser_alepa.add_argument("--start")
-    parser_alepa.add_argument("--end")
-
-    parser_alece = subparsers.add_parser("al_ce", help="ALE-CE gazettes")
-    parser_alece.add_argument("--start")
-    parser_alece.add_argument("--end")
-
-    parser_aleac = subparsers.add_parser("al_ac", help="ALE-AC gazettes")
-    parser_aleac.add_argument("--start")
-    parser_aleac.add_argument("--end")
-
-    # Parse arguments
+    parser = build_parser()
     args = parser.parse_args()
 
+    kwargs = {
+        k: v for k, v in vars(args).items()
+        if k not in {"entity", "type", "_class", "_mode"} and v is not None
+    }
+
     try:
-        run_extractor(args.entity, args)
+        instance = args._class()
+        if args._mode == "extractor":
+            instance.download(**kwargs)
+        elif args._mode == "processor":
+            instance.process(**kwargs)
+        else:
+            print("❌ Modo inválido.", file=sys.stderr)
+            sys.exit(1)
     except KeyboardInterrupt:
-        print("\n⏹️ Execution interrupted by user")
+        print("\n⏹️ O script foi interrompido pelo usuário.", file=sys.stderr)
         sys.exit(0)
     except Exception as e:
-        print(f"❌ Error during execution: {e}", file=sys.stderr)
+        print(f"❌ Erro: {e}", file=sys.stderr)
         sys.exit(1)
 
-# Main script execution guard
 if __name__ == "__main__":
     main()

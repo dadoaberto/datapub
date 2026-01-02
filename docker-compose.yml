@@ -1,44 +1,211 @@
 services:
-  postgres:
-    image: postgres:15
-    build: ./docker/postgres  
-    environment:
-      POSTGRES_PASSWORD: diarios
-      POSTGRES_DB: diarios
+  datapub:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: datapub
     volumes:
-      - pg_data:/var/lib/postgresql/data
-      - ./database.sql:/docker-entrypoint-initdb.d/database.sql 
-    ports:
-      - "5432:5432"
-  
-  elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:8.6.2
-    environment:
-      - discovery.type=single-node
-      - ES_JAVA_OPTS=-Xms1g -Xmx1g
-    volumes:
-      - es_data:/usr/share/elasticsearch/data
-    ports:
-      - "9200:9200"
-  
-  api:
-    build: ./src/api
-    ports:
-      - "8000:8000"
+      - ./src:/app/src
+      - ./storage:/app/storage
+    working_dir: /app
+    command: uvicorn datapub.api.main:app --host 0.0.0.0 --port 8000
     depends_on:
       - postgres
-      - elasticsearch
+      - neo4j
+    env_file:
+      - .env  
     environment:
-      DB_URL: postgresql://postgres:diarios@postgres/diarios
-      ES_URL: http://elasticsearch:9200
-  
-  frontend:
-    build: ./src/frontend
+      PYTHONUNBUFFERED: 1
+      PYTHONDONTWRITEBYTECODE: 1
+      DATABASE_URL: postgresql://cognee:cognee@postgres:5432/cognee_db
+      APP_DATABASE_URL: postgresql+psycopg://cognee:cognee@postgres:5432/datapub_db
+      NEO4J_URL: bolt://neo4j:7687
+      # Chat/landing configuration
+      PUBLIC_BASE_URL: ${PUBLIC_BASE_URL:-http://localhost}
+      CHAT_HISTORY_LIMIT: ${CHAT_HISTORY_LIMIT:-10}
+      CHAT_RETENTION_MESSAGES: ${CHAT_RETENTION_MESSAGES:-0}
+      CORS_ALLOWED_ORIGINS: "http://localhost:8080,http://127.0.0.1:8080,http://localhost:8081,http://127.0.0.1:8081,http://localhost:5173,http://127.0.0.1:5173"
+      API_KEYS: ""
     ports:
-      - "8501:8501"
+      - "8000:8000"
+
+  postgres:
+    build:
+      context: .
+      dockerfile: Dockerfile.postgres
+    restart: unless-stopped
+    expose:
+      - 5432
+    environment:
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+      - ./docker/postgres-init:/docker-entrypoint-initdb.d:ro
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME} -d postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - "5050:80"
     depends_on:
-      - api
+      - postgres
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+
+  neo4j:
+    image: neo4j:5.19-community
+    container_name: neo4j
+    ports:
+      - "7474:7474"  # HTTP
+      - "7687:7687"  # BOLT
+    environment:
+      NEO4J_AUTH: neo4j/pleaseletmein
+      NEO4J_PLUGINS: '["apoc", "graph-data-science"]'
+      NEO4J_dbms_security_procedures_unrestricted: 'apoc.*,gds.*'
+      NEO4J_dbms_security_procedures_allowlist: 'apoc.*,gds.*'
+      NEO4J_apoc_export_file_enabled: "true"
+      NEO4J_apoc_import_file_enabled: "true"
+    volumes:
+      - neo4j_data:/data
+      # - ./plugins:/plugins
+
+  scheduler:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: datapub-scheduler
+    depends_on:
+      - datapub
+    env_file:
+      - .env
+    environment:
+      CRON_PIPELINE: "0 3 * * *"  # 03:00 UTC diariamente
+      ENTITIES: "al_pa,al_go"      # execute para estas entidades (opcional)
+      START: "2021-01-01"         # padrão global; pode usar <ENTITY>_START
+      PUBLIC_BASE_URL: ${PUBLIC_BASE_URL:-http://localhost}
+      CHAT_HISTORY_LIMIT: ${CHAT_HISTORY_LIMIT:-10}
+      CHAT_RETENTION_MESSAGES: ${CHAT_RETENTION_MESSAGES:-0}
+    volumes:
+      - ./src:/app/src
+      - ./storage:/app/storage
+      - ./logs:/app/logs
+    ports:
+      - "9100:9100"  # Prometheus metrics
+    command: python -m datapub.scheduler
+
+  # tests:
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile
+  #   container_name: datapub-tests
+  #   depends_on:
+  #     - postgres
+  #     - neo4j
+  #   env_file:
+  #     - .env
+  #   volumes:
+  #     - ./src:/app/src
+  #     - ./tests:/app/tests
+  #     - ./storage:/app/storage
+  #   working_dir: /app
+  #   command: bash -lc "pip install -e '.[sqlalchemy,testing]' && pytest -q"
+
+  app-db-init:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: datapub-app-db-init
+    depends_on:
+      postgres:
+        condition: service_healthy
+    env_file:
+      - .env
+    environment:
+      APP_DATABASE_URL: postgresql+psycopg://cognee:cognee@postgres:5432/datapub_db
+      PUBLIC_BASE_URL: ${PUBLIC_BASE_URL:-http://localhost}
+      CHAT_HISTORY_LIMIT: ${CHAT_HISTORY_LIMIT:-10}
+      CHAT_RETENTION_MESSAGES: ${CHAT_RETENTION_MESSAGES:-0}
+      SEED_IBGE: "true"  # dev: semeia estados/municípios após migrações
+    working_dir: /app
+    volumes:
+      - ./src:/app/src
+      - ./scripts:/app/scripts
+    command: bash -lc "./scripts/init_app_db.sh"
+    restart: "no"
+
+  app-db-seed-geo:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: datapub-app-db-seed-geo
+    depends_on:
+      postgres:
+        condition: service_healthy
+    env_file:
+      - .env
+    environment:
+      APP_DATABASE_URL: postgresql+psycopg://cognee:cognee@postgres:5432/datapub_db
+    working_dir: /app
+    volumes:
+      - ./src:/app/src
+    command: bash -lc "etl-ibge"
+    restart: "no"
+
+  swagger-ui:
+    image: swaggerapi/swagger-ui:latest
+    container_name: swagger-ui
+    depends_on:
+      - datapub
+    ports:
+      - "8080:8080"
+    environment:
+      # Multiple API specs (dynamic from app and static exported file)
+      - URLS=[{"name":"datapub","url":"${PUBLIC_BASE_URL:-http://localhost}:8000/openapi.json"},{"name":"datapub-static","url":"/openapi.json"}]
+      # Prefer the static spec by default to avoid CORS until API allows it
+      - URLS_PRIMARY_NAME=datapub-static
+    volumes:
+      # Serve static exported spec at http://localhost:8080/openapi.json
+      - ./openapi/openapi.json:/usr/share/nginx/html/openapi.json:ro
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    depends_on:
+      - datapub
+      - scheduler
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    depends_on:
+      - prometheus
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./grafana/provisioning/datasources:/etc/grafana/provisioning/datasources:ro
+      - ./grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards:ro
+      - ./grafana/dashboards:/etc/grafana/dashboards:ro
 
 volumes:
   pg_data:
-  es_data:
+  pgadmin_data:
+  neo4j_data:
+  grafana_data:
